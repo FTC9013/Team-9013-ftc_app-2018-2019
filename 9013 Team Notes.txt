@@ -1,0 +1,5 @@
+This is a file to track notes about the team 9013 team code and comments to others who may be looking at our repository.
+
+Forked form ftc_app 9/23/2018 for the 2018-2019 Rover Ruckus season.
+We are using the Rev Robotics Expansion Hubs and a variety of sensors and motors as well as Viewforia for recognition and navigation.
+
