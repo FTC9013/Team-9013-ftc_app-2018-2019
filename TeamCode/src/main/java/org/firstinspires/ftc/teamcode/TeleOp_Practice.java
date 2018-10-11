@@ -56,10 +56,10 @@ public class TeleOp_Practice extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor left2Drive = null;
-    private DcMotor rightDrive = null;
-    private DcMotor right2Drive = null;
+  private DcMotor leftDrive = null;
+  private DcMotor left2Drive = null;
+  private DcMotor rightDrive = null;
+  private DcMotor right2Drive = null;
     
     
     
@@ -75,6 +75,13 @@ public class TeleOp_Practice extends LinearOpMode {
         left2Drive = hardwareMap.get(DcMotor.class,  "left_drive_R" );
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
         right2Drive = hardwareMap.get(DcMotor.class, "right_drive_R");
+        
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        
+        
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -115,6 +122,9 @@ public class TeleOp_Practice extends LinearOpMode {
             rightDrive.setPower(rightPower);
             left2Drive.setPower(leftPower);
             right2Drive.setPower(rightPower);
+            
+            
+            
             
 
             // Show the elapsed game time and wheel power.
