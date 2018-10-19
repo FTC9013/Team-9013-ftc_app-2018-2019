@@ -56,10 +56,11 @@ public class TeleOp_Practice extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-  private DcMotor leftDrive = null;
-  private DcMotor left2Drive = null;
-  private DcMotor rightDrive = null;
-  private DcMotor right2Drive = null;
+  
+    private DcMotor leftDrive = null;
+    private DcMotor left2Drive = null;
+    private DcMotor rightDrive = null;
+    private DcMotor right2Drive = null;
     
     
     
@@ -81,6 +82,11 @@ public class TeleOp_Practice extends LinearOpMode {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        
         
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -88,6 +94,7 @@ public class TeleOp_Practice extends LinearOpMode {
         left2Drive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         right2Drive.setDirection(DcMotor.Direction.REVERSE);
+        
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -97,9 +104,9 @@ public class TeleOp_Practice extends LinearOpMode {
 
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
-            double left2Power;
             double rightPower;
-            double right2Power;
+            
+            
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 /*
@@ -114,19 +121,13 @@ public class TeleOp_Practice extends LinearOpMode {
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             leftPower  = -gamepad1.left_stick_y ;
             rightPower = -gamepad1.right_stick_y ;
-            left2Power  = -gamepad1.left_stick_y ;
-            right2Power = -gamepad1.right_stick_y ;
-
+            
             // Send calculated power to wheels
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
             left2Drive.setPower(leftPower);
             right2Drive.setPower(rightPower);
             
-            
-            
-            
-
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
