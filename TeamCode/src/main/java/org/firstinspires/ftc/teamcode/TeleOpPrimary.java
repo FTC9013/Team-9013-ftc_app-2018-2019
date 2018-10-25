@@ -29,13 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -51,50 +48,21 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Practice Tele-Op", group="Linear Opmode")
+@TeleOp(name="Primary Tele-Op", group="Linear Opmode")
 //@Disabled
-public class TeleOp_Practice extends LinearOpMode {
+public class TeleOpPrimary extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-  
-    private DcMotor leftDrive = null;
-    private DcMotor left2Drive = null;
-    private DcMotor rightDrive = null;
-    private DcMotor right2Drive = null;
-    
-    
+   
+    private MecanumDriveChassis driveChassis;
     
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive_F");
-        left2Drive = hardwareMap.get(DcMotor.class,  "left_drive_R" );
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
-        right2Drive = hardwareMap.get(DcMotor.class, "right_drive_R");
-        
-        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        
-        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        left2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        right2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        
-        
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        left2Drive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        right2Drive.setDirection(DcMotor.Direction.FORWARD);
+  
+      driveChassis = new MecanumDriveChassis( hardwareMap );
         
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -124,10 +92,10 @@ public class TeleOp_Practice extends LinearOpMode {
             rightPower = -gamepad1.right_stick_y ;
             
             // Send calculated power to wheels
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
-            left2Drive.setPower(leftPower);
-            right2Drive.setPower(rightPower);
+          driveChassis.setLeftDrive(leftPower);
+          driveChassis.setRightDrive(rightPower);
+          driveChassis.setLeft2Drive(leftPower);
+          driveChassis.setRight2Drive(rightPower);
             
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
