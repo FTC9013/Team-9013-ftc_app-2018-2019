@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 
 public class MecanumDriveChassis
 {
@@ -52,27 +53,29 @@ public class MecanumDriveChassis
      rightDrive.setPower(rightPower);
   
    }
-   void setLeft2Drive(double leftPower)
+   void setLeft2Drive(double left2Power)
    {
-     left2Drive.setPower(leftPower);
+     left2Drive.setPower(left2Power);
    }
-   void setRight2Drive(double rightPower)
+   void setRight2Drive(double right2Power)
    {
-     right2Drive.setPower( rightPower);
+     right2Drive.setPower( right2Power);
    }
 
-// These are the mehtods you need to implement
+// These are the methods you need to implement
   
   void strafe(double strafeSpeed)
   {
-  
-  
+    rightDrive.setPower(Range.clip(strafeSpeed,-1,1));
+    leftDrive.setPower(Range.clip(-strafeSpeed,-1,1));
+    right2Drive.setPower(Range.clip(-strafeSpeed,-1, 1));
+    left2Drive.setPower(Range.clip(strafeSpeed,-1,1));
   }
   
   
   void drive(double driveSpeed)
   {
-    
+  
   
   }
   

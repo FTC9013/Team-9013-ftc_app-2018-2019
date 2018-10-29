@@ -72,9 +72,7 @@ public class TeleOpPrimary extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
-            
+            double strafeSpeed;
             
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
@@ -88,14 +86,16 @@ public class TeleOpPrimary extends LinearOpMode {
 */
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            leftPower  = -gamepad1.left_stick_y ;
-            rightPower = -gamepad1.right_stick_y ;
+            // - All of the following are based off of the controls, not the axis.
+            strafeSpeed  = -gamepad1.left_stick_y;
+            leftHoriz = -gamepad1.left_stick_x;
+            
             
             // Send calculated power to wheels
           driveChassis.setLeftDrive(leftPower);
           driveChassis.setRightDrive(rightPower);
-          driveChassis.setLeft2Drive(leftPower);
-          driveChassis.setRight2Drive(rightPower);
+          driveChassis.setLeft2Drive(left2Power);
+          driveChassis.setRight2Drive(right2Power);
             
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
