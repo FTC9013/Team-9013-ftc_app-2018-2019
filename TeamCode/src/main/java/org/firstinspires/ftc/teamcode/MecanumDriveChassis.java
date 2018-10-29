@@ -63,22 +63,23 @@ public class MecanumDriveChassis
    }
 
 // These are the methods you need to implement
-  
-  void strafe(double strafeSpeed)
+  /* ?  void strafe(double strafeSpeed)
   {
-    rightDrive.setPower(Range.clip(strafeSpeed,-1,1));
-    leftDrive.setPower(Range.clip(-strafeSpeed,-1,1));
-    right2Drive.setPower(Range.clip(-strafeSpeed,-1, 1));
-    left2Drive.setPower(Range.clip(strafeSpeed,-1,1));
+    rightDrive.setPower(Range.clip(strafeSpeed,-1.0,1.0));
+    leftDrive.setPower(Range.clip(-strafeSpeed,-1.0,1.0));
+    right2Drive.setPower(Range.clip(-strafeSpeed,-1.0, 1.0));
+    left2Drive.setPower(Range.clip(strafeSpeed,-1.0,1.0));
   }
   
   
   void drive(double driveSpeed)
   {
-  
-  
+    rightDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    leftDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    right2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    left2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
   }
-  
+*/
   
   void drive(double driveSpeed, int distance)
   {
@@ -100,6 +101,16 @@ public class MecanumDriveChassis
   
   }
   
+  
+  void experimentalDrive(double drivespeed)
+  
+  {
+    rightDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    leftDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    right2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    left2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
+    
+  }
   
   
 }
