@@ -63,9 +63,9 @@ public class TeleOpPrimary extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        double driveSpeedY;
-        double driveSpeedX;
-        double turn;
+        float driveSpeedY;
+        float driveSpeedX;
+        float turn;
 
       driveChassis = new MecanumDriveChassis( hardwareMap );
         
@@ -80,7 +80,7 @@ public class TeleOpPrimary extends LinearOpMode {
             driveSpeedY = gamepad1.left_stick_y;
             turn = gamepad1.right_stick_x;
 
-            //driveChassis.drive(driveSpeedY,driveSpeedX,turn);
+            driveChassis.drive(driveSpeedY,driveSpeedX,turn);
 
           //driveChassis.strafe(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
           //driveChassis.drive(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
