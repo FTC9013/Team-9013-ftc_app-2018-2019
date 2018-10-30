@@ -54,8 +54,6 @@ import com.qualcomm.robotcore.util.Range;
 public class TeleOpPrimary extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-   
     private MecanumDriveChassis driveChassis;
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -64,7 +62,11 @@ public class TeleOpPrimary extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-  
+
+        float driveSpeedY;
+        float driveSpeedX;
+        float turn;
+
       driveChassis = new MecanumDriveChassis( hardwareMap );
         
         // Wait for the game to start (driver presses PLAY)
