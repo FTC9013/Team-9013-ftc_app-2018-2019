@@ -37,9 +37,9 @@ import com.qualcomm.robotcore.util.Range;
 
 
 /**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
+ * This file contains a minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
  * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
+ * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
  *
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
@@ -57,7 +57,9 @@ public class TeleOpPrimary extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
    
     private MecanumDriveChassis driveChassis;
-    
+
+    private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
