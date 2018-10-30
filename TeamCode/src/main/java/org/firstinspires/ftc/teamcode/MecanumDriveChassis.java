@@ -6,10 +6,16 @@ import com.qualcomm.robotcore.util.Range;
 
 public class MecanumDriveChassis
 {
-  private DcMotor leftDrive = null;
-  private DcMotor left2Drive = null;
-  private DcMotor rightDrive = null;
-  private DcMotor right2Drive = null;
+  private DcMotor leftFrontDrive = null;
+  private DcMotor leftRearDrive = null;
+  private DcMotor rightFrontDrive = null;
+  private DcMotor rightRearDrive = null;
+
+
+  private double leftFrontDriveSpeed;
+  private double leftRearDriveSpeed;
+  private double rightFrontDriveSpeed;
+  private double rightRearDriveSpeed;
 
   // comment.....
   
@@ -18,99 +24,79 @@ public class MecanumDriveChassis
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    leftDrive  = hardwareMap.get(DcMotor.class, "left_drive_F");
-    left2Drive = hardwareMap.get(DcMotor.class,  "left_drive_R" );
-    rightDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
-    right2Drive = hardwareMap.get(DcMotor.class, "right_drive_R");
-  
-    leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    left2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    right2Drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-  
-    leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    left2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    right2Drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-  
-  
-    // Most robots need the motor on one side to be reversed to drive forward
-    // Reverse the motor that runs backwards when connected directly to the battery
-    leftDrive.setDirection(DcMotor.Direction.REVERSE);
-    left2Drive.setDirection(DcMotor.Direction.REVERSE);
-    rightDrive.setDirection(DcMotor.Direction.FORWARD);
-    right2Drive.setDirection(DcMotor.Direction.FORWARD);
-  }
-  
-  
-// These are going away.  Just used as example for testing.
-   void setLeftDrive(double leftPower)
-   {
-     leftDrive.setPower(leftPower);
-   }
-   void setRightDrive(double rightPower)
-   {
-     rightDrive.setPower(rightPower);
-  
-   }
-   void setLeft2Drive(double left2Power)
-   {
-     left2Drive.setPower(left2Power);
-   }
-   void setRight2Drive(double right2Power)
-   {
-     right2Drive.setPower( right2Power);
-   }
+    leftFrontDrive = hardwareMap.get(DcMotor.class, "left_drive_F");
+    leftRearDrive = hardwareMap.get(DcMotor.class, "left_drive_R");
+    rightFrontDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
+    rightRearDrive = hardwareMap.get(DcMotor.class, "right_drive_R");
 
-// These are the methods you need to implement
-  /* ?  void strafe(double strafeSpeed)
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    leftRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    rightRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+    // Motors on one side reversed to drive forward
+    // Reverse the motor that runs backwards when connected directly to the battery
+    leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+    leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+    rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+    rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+
+    // Set all the motor speeds to zero.
+    leftFrontDriveSpeed = 0;
+    leftRearDriveSpeed = 0;
+    rightFrontDriveSpeed = 0;
+    rightRearDriveSpeed = 0;
+
+    rightFrontDrive.setPower(rightFrontDriveSpeed);
+    leftFrontDrive.setPower(leftFrontDriveSpeed);
+    rightRearDrive.setPower(rightRearDriveSpeed);
+    leftRearDrive.setPower(leftRearDriveSpeed);
+  }
+
+
+  // These are the methods you need to implement
+
+  // Y=forward, backward movement, X=side to side (strafe), and turn=rotate in place
+  void drive(float driveSpeedY, float driveSpeedX, float turn )
   {
-    rightDrive.setPower(Range.clip(strafeSpeed,-1.0,1.0));
-    leftDrive.setPower(Range.clip(-strafeSpeed,-1.0,1.0));
-    right2Drive.setPower(Range.clip(-strafeSpeed,-1.0, 1.0));
-    left2Drive.setPower(Range.clip(strafeSpeed,-1.0,1.0));
+
+    // Math out what to send to the motors.
+
+
+
+    rightFrontDrive.setPower(Range.clip(-rightFrontDriveSpeed,-1.0,1.0));
+    leftFrontDrive.setPower(Range.clip(-leftFrontDriveSpeed,-1.0,1.0));
+    rightRearDrive.setPower(Range.clip(-rightRearDriveSpeed,-1.0,1.0));
+    leftRearDrive.setPower(Range.clip(-leftRearDriveSpeed,-1.0,1.0));
+  }
+
+  
+  void drive(float driveSpeedY, int distance)
+  {
+  
+  
   }
   
   
-  void drive(double driveSpeed)
-  {
-    rightDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    leftDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    right2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    left2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-  }
-*/
-  
-  void drive(double driveSpeed, int distance)
+  void drive(float driveSpeedY, Boolean absRel, int angle)
   {
   
   
   }
   
   
-  void drive(double driveSpeed, Boolean absRel, int angle)
+  void drive(float driveSpeedY, Boolean absRel, int angle, int distance)
   {
   
   
   }
-  
-  
-  void drive(double driveSpeed, Boolean absRel, int angle, int distance)
-  {
-  
-  
-  }
-  
-  
-  void experimentalDrive(double drivespeed)
-  
-  {
-    rightDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    leftDrive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    right2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    left2Drive.setPower(Range.clip(-driveSpeed,-1.0,1.0));
-    
-  }
+
+
   
   
 }
