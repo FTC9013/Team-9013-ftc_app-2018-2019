@@ -37,9 +37,9 @@ import com.qualcomm.robotcore.util.Range;
 
 
 /**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
+ * This file contains a minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
  * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
+ * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
  *
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
@@ -54,15 +54,19 @@ import com.qualcomm.robotcore.util.Range;
 public class TeleOpPrimary extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-   
     private MecanumDriveChassis driveChassis;
-    
+
+    private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-  
+
+        double driveSpeedY;
+        double driveSpeedX;
+        double turn;
+
       driveChassis = new MecanumDriveChassis( hardwareMap );
         
         // Wait for the game to start (driver presses PLAY)
@@ -70,11 +74,17 @@ public class TeleOpPrimary extends LinearOpMode {
         runtime.reset();
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive())
-        {
+        while (opModeIsActive()) {
+
+            driveSpeedX = gamepad1.left_stick_x;
+            driveSpeedY = gamepad1.left_stick_y;
+            turn = gamepad1.right_stick_x;
+
+            //driveChassis.drive(driveSpeedY,driveSpeedX,turn);
 
           //driveChassis.strafe(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
-          //driveChassis.drive(Range.clip(gamepad1.left_stick_y, -1.0, 1.0));
+          //driveChassis.drive(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
+
 
           // Show the elapsed game time and wheel power.
           telemetry.addData("Status", "Run Time: " + runtime.toString());
