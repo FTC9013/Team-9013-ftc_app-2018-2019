@@ -75,8 +75,8 @@ public class TeleOpPrimary extends LinearOpMode {
         while (opModeIsActive())
         {
 
-          driveChassis.strafe(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
-          driveChassis.drive(Range.clip(gamepad1.left_stick_y, -1.0, 1.0));
+          //driveChassis.strafe(Range.clip(gamepad1.left_stick_x, -1.0, 1.0));
+          //driveChassis.drive(Range.clip(gamepad1.left_stick_y, -1.0, 1.0));
 
           // Show the elapsed game time and wheel power.
           telemetry.addData("Status", "Run Time: " + runtime.toString());

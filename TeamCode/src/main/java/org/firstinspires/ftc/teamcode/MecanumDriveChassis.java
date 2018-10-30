@@ -69,10 +69,10 @@ public class MecanumDriveChassis
 
 
 
-    rightFrontDrive.setPower(Range.clip(-rightFrontDriveSpeed,-1.0,1.0));
-    leftFrontDrive.setPower(Range.clip(-leftFrontDriveSpeed,-1.0,1.0));
-    rightRearDrive.setPower(Range.clip(-rightRearDriveSpeed,-1.0,1.0));
-    leftRearDrive.setPower(Range.clip(-leftRearDriveSpeed,-1.0,1.0));
+    rightFrontDrive.setPower(Range.clip(-driveSpeedY -driveSpeedX +turn,-1.0,1.0));
+    leftFrontDrive.setPower(Range.clip(-driveSpeedY +driveSpeedX -turn,-1.0,1.0));
+    rightRearDrive.setPower(Range.clip(-driveSpeedY +driveSpeedX +turn,-1.0,1.0));
+    leftRearDrive.setPower(Range.clip(-driveSpeedY -driveSpeedX -turn,-1.0,1.0));
   }
 
   
