@@ -29,10 +29,10 @@ public class MecanumDriveChassis
     rightFrontDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
     rightRearDrive = hardwareMap.get(DcMotor.class, "right_drive_R");
 
-    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
     leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     leftRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -47,10 +47,10 @@ public class MecanumDriveChassis
     rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
 
     // Set all the motor speeds to zero.
-    leftFrontDriveSpeed = 0;
-    leftRearDriveSpeed = 0;
     rightFrontDriveSpeed = 0;
+    leftFrontDriveSpeed = 0;
     rightRearDriveSpeed = 0;
+    leftRearDriveSpeed = 0;
 
     rightFrontDrive.setPower(rightFrontDriveSpeed);
     leftFrontDrive.setPower(leftFrontDriveSpeed);
@@ -67,12 +67,20 @@ public class MecanumDriveChassis
 
     // Math out what to send to the motors.
 
+    // This needs work...
+
+    rightFrontDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX +turn,-1.0,1.0);
+    leftFrontDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX -turn,-1.0,1.0);
+    rightRearDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX +turn,-1.0,1.0);
+    leftRearDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX -turn,-1.0,1.0);
 
 
-    rightFrontDrive.setPower(Range.clip(-driveSpeedY -driveSpeedX +turn,-1.0,1.0));
-    leftFrontDrive.setPower(Range.clip(-driveSpeedY +driveSpeedX -turn,-1.0,1.0));
-    rightRearDrive.setPower(Range.clip(-driveSpeedY +driveSpeedX +turn,-1.0,1.0));
-    leftRearDrive.setPower(Range.clip(-driveSpeedY -driveSpeedX -turn,-1.0,1.0));
+
+    // send the speeds to the motors
+    rightFrontDrive.setPower(rightFrontDriveSpeed);
+    leftFrontDrive.setPower(leftFrontDriveSpeed);
+    rightRearDrive.setPower(rightRearDriveSpeed);
+    leftRearDrive.setPower(leftRearDriveSpeed);
   }
 
   

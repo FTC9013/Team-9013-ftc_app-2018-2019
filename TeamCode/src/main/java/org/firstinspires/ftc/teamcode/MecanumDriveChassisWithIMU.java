@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
 
 public class MecanumDriveChassisWithIMU
 {
@@ -14,11 +14,14 @@ public class MecanumDriveChassisWithIMU
   private DcMotor rightFrontDrive = null;
   private DcMotor rightRearDrive = null;
 
+
+  private double leftFrontDriveSpeed;
+  private double leftRearDriveSpeed;
+  private double rightFrontDriveSpeed;
+  private double rightRearDriveSpeed;
+
   private BNO055IMU imu;
   private Orientation lastAngles = new Orientation();
-
-
-
 
   // comment.....
 
@@ -42,13 +45,23 @@ public class MecanumDriveChassisWithIMU
     rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     rightRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
     // Motors on one side reversed to drive forward
     // Reverse the motor that runs backwards when connected directly to the battery
     leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
     leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
     rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
     rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+
+    // Set all the motor speeds to zero.
+    rightFrontDriveSpeed = 0;
+    leftFrontDriveSpeed = 0;
+    rightRearDriveSpeed = 0;
+    leftRearDriveSpeed = 0;
+
+    rightFrontDrive.setPower(rightFrontDriveSpeed);
+    leftFrontDrive.setPower(leftFrontDriveSpeed);
+    rightRearDrive.setPower(rightRearDriveSpeed);
+    leftRearDrive.setPower(leftRearDriveSpeed);
 
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -74,66 +87,50 @@ public class MecanumDriveChassisWithIMU
 //      sleep(50);
 //      idle();
 //    }
-
-
-
   }
 
 
 
+  // These are the methods you need to implement
 
-
-
-  // These are going away.  Just used as example for testing.
-  void setLeftFrontDrive(double leftPower)
+  // Y=forward, backward movement, X=side to side (strafe), and turn=rotate in place
+  void drive(float driveSpeedY, float driveSpeedX, float turn )
   {
-    leftFrontDrive.setPower(leftPower);
-  }
-  void setRightFrontDrive(double rightPower)
-  {
-    rightFrontDrive.setPower(rightPower);
 
-  }
-  void setLeftRearDrive(double leftPower)
-  {
-    leftRearDrive.setPower(leftPower);
-  }
-  void setRightRearDrive(double rightPower)
-  {
-    rightRearDrive.setPower( rightPower);
+    // Math out what to send to the motors.
+
+    // This needs work...
+
+    rightFrontDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX +turn,-1.0,1.0);
+    leftFrontDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX -turn,-1.0,1.0);
+    rightRearDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX +turn,-1.0,1.0);
+    leftRearDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX -turn,-1.0,1.0);
+
+
+
+    // send the speeds to the motors
+    rightFrontDrive.setPower(rightFrontDriveSpeed);
+    leftFrontDrive.setPower(leftFrontDriveSpeed);
+    rightRearDrive.setPower(rightRearDriveSpeed);
+    leftRearDrive.setPower(leftRearDriveSpeed);
   }
 
-// These are the mehtods you need to implement
 
-  void strafe(double strafeSpeed)
+  void drive(float driveSpeedY, int distance)
   {
 
 
   }
 
 
-  void drive(double driveSpeed)
+  void drive(float driveSpeedY, Boolean absRel, int angle)
   {
 
 
   }
 
 
-  void drive(double driveSpeed, int distance)
-  {
-
-
-  }
-
-
-  void drive(double driveSpeed, Boolean absRel, int angle)
-  {
-
-
-  }
-
-
-  void drive(double driveSpeed, Boolean absRel, int angle, int distance)
+  void drive(float driveSpeedY, Boolean absRel, int angle, int distance)
   {
 
 
