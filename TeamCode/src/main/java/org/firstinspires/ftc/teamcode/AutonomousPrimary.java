@@ -29,19 +29,19 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 /*
 
 
-*/
+ */
 
-@TeleOp(name="Primary Tele-Op", group="Linear Opmode")
+@Autonomous(name = "AutonomousPrimary", group = "Linear Opmode")
 //@Disabled
-public class TeleOpPrimary extends LinearOpMode {
+public class AutonomousPrimary extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassis driveChassis;
@@ -62,8 +62,13 @@ public class TeleOpPrimary extends LinearOpMode {
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 
+
+
+      // need to replace joystick input with commands for autonomous.
+
       // send joystick inputs to the drive chassis
       driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+
 
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
