@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
+
 
 public class MecanumDriveChassis
 {
@@ -38,10 +40,10 @@ public class MecanumDriveChassis
     rightFrontDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
     rightRearDrive = hardwareMap.get(DcMotor.class, "right_drive_R");
 
-    leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    leftRearDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    rightRearDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     leftRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -55,7 +57,12 @@ public class MecanumDriveChassis
     rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
     rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
 
-    // Set all the motor speeds to zero.
+    // set motion parameters.
+    vD = 0;
+    thetaD = 0;
+    vTheta = 0;
+
+    // Set all the motor speeds.
     rightFrontDriveSpeed = 0;
     leftFrontDriveSpeed = 0;
     rightRearDriveSpeed = 0;
@@ -91,83 +98,36 @@ public class MecanumDriveChassis
     rightRearDrive.setPower(rightRearDriveSpeed);
     leftRearDrive.setPower(leftRearDriveSpeed);
   }
-  
-//import java.util.Arrays;
-
-
-/**
- * Mecanum wheel drive calculations.
- * Input controls:
- *   V_d = desired robot speed.
- *   theta_d = desired robot velocity angle.
- *   V_theta = desired robot rotational speed.
- *
- *  Example:
- *    // Convert joysticks to wheel powers.
- *    Mecanum.Wheels wheels = Mecanum.motionToWheels(
- *        Mecanum.joystickToMotion(
- *            gamepad1.left_stick_x, gamepad1.left_stick_y,
- *            gamepad1.right_stick_x, gamepad1.right_stick_y));
- *    // Set power on the motors.
- *    frontLeftMotor.setPower(wheels.frontLeft);
- */
-public class Mecanum {
-
 
   /**
-   * Gets the motion vector from the joystick values.
-   * @param leftStickX The left joystick X.
-   * @param leftStickY The left joystick Y.
-   * @param rightStickX The right joystick X.
-   * @param rightStickY The right joystick Y.
-   * @return The Mecanum motion vector.
+   * Process the joystick values into motion vector.
+   *  V_d = desired robot speed.
+   *  theta_d = desired robot velocity angle.
+   *  V_theta = desired robot rotational speed.
    */
-  public static Motion joystickToMotion(double leftStickX,
-                                        double leftStickY,
-                                        double rightStickX,
-                                        double rightStickY) {
-    double vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) +
-                                       Math.pow(leftStickY, 2)),
-        1);
-    double thetaD = Math.atan2(-leftStickX, -leftStickY);
-    double vTheta = -rightStickX;
-    return new Motion(vD, thetaD, vTheta);
+  void joystickToMotion( double leftStickX,
+                         double leftStickY,
+                         double rightStickX ) {
+    vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
+    thetaD = Math.atan2(-leftStickX, -leftStickY);
+    vTheta = -rightStickX;
   }
 
   /**
-   * Mecanum wheels, used to get individual motor powers.
-   */
-  public static class Wheels {
-    // The mecanum wheels.
-    public final double frontLeft;
-    public final double frontRight;
-    public final double backLeft;
-    public final double backRight;
-
-    /**
-     * Sets the wheels to the given values.
-     */
-    public Wheels(double frontLeft, double frontRight,
-                  double backLeft, double backRight) {
-      List<Double> powers = Arrays.asList(frontLeft, frontRight,
-          backLeft, backRight);
-      clampPowers(powers);
-
-      this.frontLeft = powers.get(0);
-      this.frontRight = powers.get(1);
-      this.backLeft = powers.get(2);
-      this.backRight = powers.get(3);
-    }
-
-    /**
      * Scales the wheel powers by the given factor.
      * @param scalar The wheel power scaling factor.
-     */
-    public Wheels scaleWheelPower(double scalar) {
-      return new Wheels(frontLeft * scalar, frontRight * scalar,
-          backLeft * scalar, backRight * scalar);
-    }
+  */
+  void scalePower(double scalar) {
+    // Scale all the motor speeds.
+    rightFrontDriveSpeed = rightFrontDriveSpeed * scalar;
+    leftFrontDriveSpeed  = leftFrontDriveSpeed  * scalar;
+    rightRearDriveSpeed  = rightRearDriveSpeed  * scalar;
+    leftRearDriveSpeed   = leftRearDriveSpeed   * scalar;
   }
+
+
+
+
 
   /**
    * Gets the wheel powers corresponding to desired motion.
@@ -202,9 +162,4 @@ public class Mecanum {
       }
     }
   }
-}
-
-
-
-
 }

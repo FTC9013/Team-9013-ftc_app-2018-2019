@@ -8,13 +8,13 @@ public class Elevator
 {
   private DcMotor elevatorMotor = null;
 
-  private final double elevatorRun = 0.25;
-  private final double elevatorStop = 0;
+  static final double elevatorRun = 0.25;
+  static final double elevatorStop = 0;
 
   //Maximum height of Elevator.
-  private final int topFloor = 288;
+  static final int topFloor = 288;
   //Minimum height of Elevator.
-  private final int lobbyFloor = 0;
+  static final int lobbyFloor = 0;
 
 
   // comment.....
