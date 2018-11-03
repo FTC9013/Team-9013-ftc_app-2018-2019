@@ -45,6 +45,7 @@ public class TeleOpPrimary extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassis driveChassis;
+  private Elevator landingElevator;
 
   private ElapsedTime runtime = new ElapsedTime();
 
@@ -54,6 +55,7 @@ public class TeleOpPrimary extends LinearOpMode {
     telemetry.update();
 
     driveChassis = new MecanumDriveChassis(hardwareMap);
+    landingElevator = new Elevator(hardwareMap);
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
@@ -64,6 +66,13 @@ public class TeleOpPrimary extends LinearOpMode {
 
       // send joystick inputs to the drive chassis
       driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+
+      if( gamepad1.x) {
+        landingElevator.up();
+      }
+      else{
+        landingElevator.down();
+      }
 
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());

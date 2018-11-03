@@ -1,11 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Elevator
 {
-  private DcMotor leftDrive = null;
+  private DcMotor elevatorMotor = null;
+
+  private final double elevatorRun = 0.25;
+  private final double elevatorStop = 0;
+
+  //Maximum height of Elevator.
+  private final int topFloor = 288;
+  //Minimum height of Elevator.
+  private final int lobbyFloor = 0;
 
 
   // comment.....
@@ -15,29 +24,30 @@ public class Elevator
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    leftDrive  = hardwareMap.get(DcMotor.class, "left_drive_F");
+    elevatorMotor = hardwareMap.get(DcMotor.class, "ElevatorMotor");
 
-  
-    leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    elevatorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-  
-    leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    elevatorMotor.setDirection(DcMotor.Direction.FORWARD);
 
-  
-  
-    // Most robots need the motor on one side to be reversed to drive forward
-    // Reverse the motor that runs backwards when connected directly to the battery
-    leftDrive.setDirection(DcMotor.Direction.REVERSE);
+    elevatorMotor.setPower(elevatorStop);
 
+    elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    elevatorMotor.setPower(elevatorRun);
+
+    elevatorMotor.setTargetPosition(lobbyFloor);
+
+    elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
-  
-  
-  
-   void setLeftDrive(double leftPower)
+
+   void up()
    {
-     leftDrive.setPower(leftPower);
+       elevatorMotor.setTargetPosition(topFloor);
    }
-   
-   
-  
+
+   void down()
+   {
+       elevatorMotor.setTargetPosition(lobbyFloor);
+   }
 }
