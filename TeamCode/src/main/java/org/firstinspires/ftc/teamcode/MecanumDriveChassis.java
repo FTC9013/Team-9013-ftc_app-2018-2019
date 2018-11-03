@@ -126,9 +126,6 @@ public class MecanumDriveChassis
   }
 
 
-
-
-
   /**
    * Gets the wheel powers corresponding to desired motion.
    * @param motion The Mecanum motion vector.
