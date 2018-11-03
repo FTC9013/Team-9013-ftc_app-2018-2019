@@ -34,10 +34,10 @@ public class MecanumDriveChassis
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    leftFrontDrive = hardwareMap.get(DcMotor.class, "left_drive_F");
-    leftRearDrive = hardwareMap.get(DcMotor.class, "left_drive_R");
-    rightFrontDrive = hardwareMap.get(DcMotor.class, "right_drive_F");
-    rightRearDrive = hardwareMap.get(DcMotor.class, "right_drive_R");
+    leftFrontDrive = hardwareMap.get(DcMotor.class, "lFront");
+    leftRearDrive = hardwareMap.get(DcMotor.class, "lRear");
+    rightFrontDrive = hardwareMap.get(DcMotor.class, "rFront");
+    rightRearDrive = hardwareMap.get(DcMotor.class, "rRear");
 
     leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -78,7 +78,7 @@ public class MecanumDriveChassis
   void drive(float driveSpeedX, float driveSpeedY, float turn )
   {
     // calculate the vectors
-    joystickToMotion( driveSpeedX, driveSpeedY, turn  );
+    joystickToMotion( driveSpeedX/2, driveSpeedY/2, turn/2  );
     
     // Math out what to send to the motors and send it.
     PowerToWheels();
@@ -96,18 +96,6 @@ public class MecanumDriveChassis
     vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
     thetaD = Math.atan2(-leftStickX, -leftStickY);
     vTheta = -rightStickX;
-  }
-
-  /**
-     * Scales the wheel powers by the given factor.
-     * @param scalar The wheel power scaling factor.
-  */
-  private void scalePower(double scalar) {
-    // Scale all the motor speeds.
-    rightFrontDriveSpeed = rightFrontDriveSpeed * scalar;
-    leftFrontDriveSpeed  = leftFrontDriveSpeed  * scalar;
-    rightRearDriveSpeed  = rightRearDriveSpeed  * scalar;
-    leftRearDriveSpeed   = leftRearDriveSpeed   * scalar;
   }
 
   /**
