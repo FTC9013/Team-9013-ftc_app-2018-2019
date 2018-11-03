@@ -27,17 +27,18 @@ public class MecanumDriveChassis
   // Speed for changing direction [-1, 1].
   private static double vTheta;
   
-  // comment.....
+  // Robot speed scaling factor
+  private final float speedScale = 2;
   
   MecanumDriveChassis(HardwareMap hardwareMap)
   {
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    leftFrontDrive = hardwareMap.get(DcMotor.class, "lFront");
-    leftRearDrive = hardwareMap.get(DcMotor.class, "lRear");
-    rightFrontDrive = hardwareMap.get(DcMotor.class, "rFront");
-    rightRearDrive = hardwareMap.get(DcMotor.class, "rRear");
+    leftFrontDrive = hardwareMap.get(DcMotor.class, "lFront"); //hub 3 port 0
+    leftRearDrive = hardwareMap.get(DcMotor.class, "lRear"); //hub 3 port 2
+    rightFrontDrive = hardwareMap.get(DcMotor.class, "rFront"); //hub 3 port 1
+    rightRearDrive = hardwareMap.get(DcMotor.class, "rRear"); //hub 3 port 3
 
     leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -78,7 +79,8 @@ public class MecanumDriveChassis
   void drive(float driveSpeedX, float driveSpeedY, float turn )
   {
     // calculate the vectors
-    joystickToMotion( driveSpeedX/2, driveSpeedY/2, turn/2  );
+    joystickToMotion( driveSpeedX/speedScale, driveSpeedY/speedScale,
+           turn/speedScale  );
     
     // Math out what to send to the motors and send it.
     PowerToWheels();
