@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
@@ -75,28 +74,14 @@ public class MecanumDriveChassis
   }
 
 
-  // These are the methods you need to implement
-
-  // Y=forward, backward movement, X=side to side (strafe), and turn=rotate in place
-  void drive(float driveSpeedY, float driveSpeedX, float turn )
+  // X=side to side (strafe), Y=forward, backward movement, and turn=rotate in place
+  void drive(float driveSpeedX, float driveSpeedY, float turn )
   {
-
-    // Math out what to send to the motors.
-
-    // This needs work...
-
-    rightFrontDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX +turn,-1.0,1.0);
-    leftFrontDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX -turn,-1.0,1.0);
-    rightRearDriveSpeed = Range.clip(-driveSpeedY +driveSpeedX +turn,-1.0,1.0);
-    leftRearDriveSpeed = Range.clip(-driveSpeedY -driveSpeedX -turn,-1.0,1.0);
-
-
-
-    // send the speeds to the motors
-    rightFrontDrive.setPower(rightFrontDriveSpeed);
-    leftFrontDrive.setPower(leftFrontDriveSpeed);
-    rightRearDrive.setPower(rightRearDriveSpeed);
-    leftRearDrive.setPower(leftRearDriveSpeed);
+    // calculate the vectors
+    joystickToMotion( driveSpeedX, driveSpeedY, turn  );
+    
+    // Math out what to send to the motors and send it.
+    PowerToWheels();
   }
 
   /**
@@ -105,7 +90,7 @@ public class MecanumDriveChassis
    *  theta_d = desired robot velocity angle.
    *  V_theta = desired robot rotational speed.
    */
-  void joystickToMotion( double leftStickX,
+  private void joystickToMotion( double leftStickX,
                          double leftStickY,
                          double rightStickX ) {
     vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
@@ -117,7 +102,7 @@ public class MecanumDriveChassis
      * Scales the wheel powers by the given factor.
      * @param scalar The wheel power scaling factor.
   */
-  void scalePower(double scalar) {
+  private void scalePower(double scalar) {
     // Scale all the motor speeds.
     rightFrontDriveSpeed = rightFrontDriveSpeed * scalar;
     leftFrontDriveSpeed  = leftFrontDriveSpeed  * scalar;
@@ -125,38 +110,41 @@ public class MecanumDriveChassis
     leftRearDriveSpeed   = leftRearDriveSpeed   * scalar;
   }
 
-
   /**
-   * Gets the wheel powers corresponding to desired motion.
-   * @param motion The Mecanum motion vector.
-   * @return The wheels with clamped powers. [-1, 1]
-   */
-  public static Wheels motionToWheels(Motion motion) {
-    double vD = motion.vD;
-    double thetaD = motion.thetaD;
-    double vTheta = motion.vTheta;
+ * Calculate the power settings and send to the wheels
+ */
+  private void PowerToWheels() {
 
-    double frontLeft = vD * Math.sin(-thetaD + Math.PI / 4) - vTheta;
-    double frontRight  = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
-    double backLeft = vD * Math.cos(-thetaD + Math.PI / 4) - vTheta;
-    double backRight = vD * Math.sin(-thetaD + Math.PI / 4) + vTheta;
-    return new Wheels(frontLeft, frontRight,
-        backLeft, backRight);
-  }
-
-  /**
-   * Clamps the motor powers while maintaining power ratios.
-   * @param powers The motor powers to clamp.
-   */
-  private static void clampPowers(List<Double> powers) {
-    double minPower = Collections.min(powers);
-    double maxPower = Collections.max(powers);
+    rightFrontDriveSpeed = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
+    leftFrontDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) - vTheta;
+    rightRearDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) + vTheta;
+    leftRearDriveSpeed   = vD * Math.cos(-thetaD + Math.PI / 4) - vTheta;
+    
+    // scales the motor powers while maintaining power ratios.
+    List<Double> speeds = Arrays.asList(rightFrontDriveSpeed,
+    leftFrontDriveSpeed, rightRearDriveSpeed, leftRearDriveSpeed  );
+    
+    double minPower = Collections.min(speeds);
+    double maxPower = Collections.max(speeds);
     double maxMag = Math.max(Math.abs(minPower), Math.abs(maxPower));
-
-    if (maxMag > 1.0) {
-      for (int i = 0; i < powers.size(); i++) {
-        powers.set(i, powers.get(i) / maxMag);
+    
+    if (maxMag > 1.0)
+    {
+      for (int i = 0; i < speeds.size(); i++)
+      {
+        speeds.set(i, speeds.get(i) / maxMag);
       }
     }
+    // must be same order as placed in the list
+    rightFrontDriveSpeed = speeds.get(0);
+    leftFrontDriveSpeed  = speeds.get(1);
+    rightRearDriveSpeed  = speeds.get(2);
+    leftRearDriveSpeed   = speeds.get(3);
+  
+    // send the speeds to the motors
+    rightFrontDrive.setPower(rightFrontDriveSpeed);
+    leftFrontDrive.setPower(leftFrontDriveSpeed);
+    rightRearDrive.setPower(rightRearDriveSpeed);
+    leftRearDrive.setPower(leftRearDriveSpeed);
   }
 }
