@@ -12,10 +12,12 @@ public class Arm
   static final double armStop = 0;
   
   //Maximum height of Elevator.
-  static final int top = 72;
+  //static final int top = 72;
   //Minimum height of Elevator.
-  static final int bottom = 0;
-  
+  //static final int bottom = 0;
+
+  //int curPose = 0;
+  //int tarPose = 0;
   
   // comment.....
   
@@ -24,7 +26,7 @@ public class Arm
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    armMotor = hardwareMap.get(DcMotor.class, "ElevatorMotor");
+    armMotor = hardwareMap.get(DcMotor.class, "ArmMotor");
   
     armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
   
@@ -35,19 +37,25 @@ public class Arm
     armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
   
     armMotor.setPower(armRun);
-  
-    armMotor.setTargetPosition(bottom);
-  
+
+    armMotor.setTargetPosition(0);
+
     armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
   void lift()
   {
-    armMotor.setTargetPosition(top);
+    armMotor.setTargetPosition(armMotor.getCurrentPosition()-4);
+    if(armMotor.getTargetPosition() < 0){
+      armMotor.setTargetPosition(0);
+    }
   }
-  
+
   void lower()
   {
-    armMotor.setTargetPosition(bottom);
+    armMotor.setTargetPosition(armMotor.getCurrentPosition()+4);
+    if(armMotor.getTargetPosition() > 72){
+      armMotor.setTargetPosition(72);
+    }
   }
 }

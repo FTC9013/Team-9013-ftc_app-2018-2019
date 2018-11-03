@@ -46,6 +46,7 @@ public class TeleOpPrimary extends LinearOpMode {
   // Declare OpMode members.
   private MecanumDriveChassis driveChassis;
   private Elevator landingElevator;
+  private Arm collectorArm;
 
   private ElapsedTime runtime = new ElapsedTime();
 
@@ -56,6 +57,7 @@ public class TeleOpPrimary extends LinearOpMode {
 
     driveChassis = new MecanumDriveChassis(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
+    collectorArm = new Arm(hardwareMap);
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
@@ -72,6 +74,13 @@ public class TeleOpPrimary extends LinearOpMode {
       }
       else{
         landingElevator.down();
+      }
+
+      if(gamepad1.dpad_up) {
+        collectorArm.lift();
+      }
+      if(gamepad1.dpad_down) {
+        collectorArm.lower();
       }
 
       // Show the elapsed game time and wheel power.
