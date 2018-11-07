@@ -8,7 +8,7 @@ public class Arm
 {
   private DcMotor armMotor = null;
   
-  static final double armRun = 0.25;
+  static final double armRun = 0.70;
   static final double armStop = 0;
   
   //Maximum height of Elevator.
@@ -30,7 +30,7 @@ public class Arm
   
     armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
   
-    armMotor.setDirection(DcMotor.Direction.FORWARD);
+    armMotor.setDirection(DcMotor.Direction.REVERSE);
   
     armMotor.setPower(armStop);
   
