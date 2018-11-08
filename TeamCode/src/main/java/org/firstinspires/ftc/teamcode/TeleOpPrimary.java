@@ -59,6 +59,9 @@ public class TeleOpPrimary extends LinearOpMode {
     landingElevator = new Elevator(hardwareMap);
     collectorArm = new Arm(hardwareMap);
 
+    boolean gamepad1XToggleFlag = false;
+    boolean gamepad1XToggleLock = false;
+
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
@@ -83,6 +86,17 @@ public class TeleOpPrimary extends LinearOpMode {
         collectorArm.lower();
       }
 
+      if(gamepad1.x && !gamepad1XToggleFlag && !gamepad1XToggleLock){
+        gamepad1XToggleFlag = true;
+        gamepad1XToggleLock = true;
+      }
+      else if(gamepad1.x && gamepad1XToggleFlag && !gamepad1XToggleLock){
+        gamepad1XToggleFlag = false;
+        gamepad1XToggleLock = true;
+      }
+      if(!gamepad1.x) {
+        gamepad1XToggleLock = false;
+      }
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
       telemetry.update();
