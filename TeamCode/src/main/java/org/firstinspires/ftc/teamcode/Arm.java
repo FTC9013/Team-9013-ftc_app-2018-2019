@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Arm
 {
@@ -43,19 +43,29 @@ public class Arm
     armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
+  ElapsedTime armTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  private final double armHoldOffTime = 0.5;
+  
+  public boolean armMoveAllowed(){
+    return armTimer.time() > armHoldOffTime;
+  }
   void lift()
   {
-    armMotor.setTargetPosition(armMotor.getCurrentPosition()-4);
-    if(armMotor.getTargetPosition() < 0){
-      armMotor.setTargetPosition(0);
+    if(armMoveAllowed()){
+      armMotor.setTargetPosition(armMotor.getCurrentPosition()-4);
+      if(armMotor.getTargetPosition() < 0){
+        armMotor.setTargetPosition(0);
+      }
     }
   }
 
   void lower()
   {
-    armMotor.setTargetPosition(armMotor.getCurrentPosition()+4);
-    if(armMotor.getTargetPosition() > 72){
-      armMotor.setTargetPosition(72);
+    if(armMoveAllowed()){
+      armMotor.setTargetPosition(armMotor.getCurrentPosition()+4);
+      if(armMotor.getTargetPosition() > 72){
+        armMotor.setTargetPosition(72);
+      }
     }
   }
 }
