@@ -44,7 +44,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class AutonomousPrimary extends LinearOpMode {
 
   // Declare OpMode members.
-  private MecanumDriveChassis driveChassis;
+  private MecanumDriveChassisAutonomousIMU driveChassis;
 
   private ElapsedTime runtime = new ElapsedTime();
 
@@ -53,7 +53,7 @@ public class AutonomousPrimary extends LinearOpMode {
     telemetry.addData("Status", "Initialized");
     telemetry.update();
 
-    driveChassis = new MecanumDriveChassis(hardwareMap);
+    driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
@@ -62,7 +62,7 @@ public class AutonomousPrimary extends LinearOpMode {
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 
-
+      //isStopRequested();
 
       // need to replace joystick input with commands for autonomous.
 

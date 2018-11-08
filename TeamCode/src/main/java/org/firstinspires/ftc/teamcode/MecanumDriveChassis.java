@@ -27,8 +27,9 @@ public class MecanumDriveChassis
   // Speed for changing direction [-1, 1].
   private static double vTheta;
   
-  // Robot speed scaling factor
-  private final float speedScale = 2;
+  // Robot speed scaling factor (% of joystick input to use)
+  // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
+  private final double speedScale = 0.5;
   
   MecanumDriveChassis(HardwareMap hardwareMap)
   {
@@ -74,13 +75,12 @@ public class MecanumDriveChassis
     leftRearDrive.setPower(leftRearDriveSpeed);
   }
 
-
   // X=side to side (strafe), Y=forward, backward movement, and turn=rotate in place
   void drive(float driveSpeedX, float driveSpeedY, float turn )
   {
     // calculate the vectors
-    joystickToMotion( driveSpeedX/speedScale, driveSpeedY/speedScale,
-           turn/speedScale  );
+    joystickToMotion( driveSpeedX*speedScale, driveSpeedY*speedScale,
+           turn*speedScale  );
     
     // Math out what to send to the motors and send it.
     PowerToWheels();
@@ -101,8 +101,8 @@ public class MecanumDriveChassis
   }
 
   /**
- * Calculate the power settings and send to the wheels
- */
+  * Calculate the power settings and send to the wheels
+  */
   private void PowerToWheels() {
 
     rightFrontDriveSpeed = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
