@@ -49,6 +49,13 @@ public class TeleOpPrimary extends LinearOpMode {
   private Arm collectorArm;
 
   private ElapsedTime runtime = new ElapsedTime();
+  // a timer for debouncing all the buttons on the game pad that need debounce.
+  ElapsedTime bounceTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  // the time to hold before allowing state change on button.
+  private final double buttonDebounceTime = 0.25;
+  // debounce lockout variables.
+  private double gamepad1XDebounceLockTime = 0;
+
 
   @Override
   public void runOpMode() {
@@ -61,6 +68,7 @@ public class TeleOpPrimary extends LinearOpMode {
 
     boolean gamepad1XToggleFlag = false;
     boolean gamepad1XToggleLock = false;
+    boolean elevatorUp = false;
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
@@ -72,11 +80,13 @@ public class TeleOpPrimary extends LinearOpMode {
       // send joystick inputs to the drive chassis
       driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-      if( gamepad1.x) {
+      if(gamepad1XToggleFlag && !elevatorUp) {
         landingElevator.up();
+        elevatorUp = true;
       }
-      else{
+      else if(!gamepad1XToggleFlag && elevatorUp){
         landingElevator.down();
+        elevatorUp = false;
       }
 
       if(gamepad1.dpad_up) {
@@ -86,20 +96,32 @@ public class TeleOpPrimary extends LinearOpMode {
         collectorArm.lower();
       }
 
-      if(gamepad1.x && !gamepad1XToggleFlag && !gamepad1XToggleLock){
+      if(gamepad1.x && !gamepad1XToggleFlag && !gamepad1XToggleLock
+         && bounceTimeCheck(gamepad1XDebounceLockTime)){
         gamepad1XToggleFlag = true;
         gamepad1XToggleLock = true;
+        gamepad1XDebounceLockTime = bounceTimer.time();
       }
-      else if(gamepad1.x && gamepad1XToggleFlag && !gamepad1XToggleLock){
+      else if(gamepad1.x && gamepad1XToggleFlag && !gamepad1XToggleLock
+              && bounceTimeCheck(gamepad1XDebounceLockTime)){
         gamepad1XToggleFlag = false;
         gamepad1XToggleLock = true;
+        gamepad1XDebounceLockTime = bounceTimer.time();
       }
-      if(!gamepad1.x) {
+      if(!gamepad1.x && bounceTimeCheck(gamepad1XDebounceLockTime)) {
         gamepad1XToggleLock = false;
+        gamepad1XDebounceLockTime = bounceTimer.time();
       }
+
+
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
       telemetry.update();
     }
+  }
+
+  // test the debounce lockout against the timer
+  private boolean bounceTimeCheck ( double lockoutVariable){
+    return bounceTimer.time() > (lockoutVariable + buttonDebounceTime);
   }
 }
