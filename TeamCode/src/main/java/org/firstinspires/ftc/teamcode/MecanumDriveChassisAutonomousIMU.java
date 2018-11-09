@@ -94,11 +94,11 @@ public class MecanumDriveChassisAutonomousIMU
 
     // THIS WILL have to be sorted out...
 
-    while (!isStopRequested() && !imu.isGyroCalibrated())
+/*    while (!isStopRequested() && !imu.isGyroCalibrated())
     {
       sleep(50);
       idle();
-    }
+    }*/
   }
 
 
