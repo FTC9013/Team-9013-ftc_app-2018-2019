@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import com.qualcomm.robotcore.util.ElapsedTime;
 public class Elevator
 {
   private DcMotor elevatorMotor = null;
@@ -40,14 +40,18 @@ public class Elevator
 
     elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
-
-   void up()
-   {
-       elevatorMotor.setTargetPosition(topFloor);
+  
+   void up()   {
+       
+         elevatorMotor.setTargetPosition(topFloor);
+       
+    
    }
 
-   void down()
-   {
+   void down()   {
+    
        elevatorMotor.setTargetPosition(lobbyFloor);
+     
+     
    }
 }

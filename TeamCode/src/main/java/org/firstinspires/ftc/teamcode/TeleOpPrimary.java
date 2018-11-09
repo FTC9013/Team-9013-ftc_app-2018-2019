@@ -35,8 +35,19 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 /*
+Motor Names for Configuration
 
+Hub 2:
+0 = eMotor (rev robotics 40:1 HD Hex)
+1 = aMotor (rev robotics 40:1 HD Hex)
+0 = cServo
 
+Hub 3:
+
+lFront (NeveRest 40 Gearmotor)
+rFront (NeveRest 40 Gearmotor)
+lRear (NeveRest 40 Gearmotor)
+rRear (NeveRest 40 Gearmotor)
 */
 
 @TeleOp(name="Primary Tele-Op", group="Linear Opmode")
