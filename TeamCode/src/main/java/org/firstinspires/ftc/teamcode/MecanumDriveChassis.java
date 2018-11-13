@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,7 @@ public class MecanumDriveChassis
   
   // Robot speed scaling factor (% of joystick input to use)
   // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
-  private final double speedScale = 0.5;
+  private final double speedScale = 0.8;
   
   MecanumDriveChassis(HardwareMap hardwareMap)
   {
@@ -53,10 +54,10 @@ public class MecanumDriveChassis
 
     // Motors on one side reversed to drive forward
     // Reverse the motor that runs backwards when connected directly to the battery
-    leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-    leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-    rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-    rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+    leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+    leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
+    rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+    rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
     // set motion parameters.
     vD = 0;
@@ -97,7 +98,7 @@ public class MecanumDriveChassis
                          double rightStickX ) {
     vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
     thetaD = Math.atan2(-leftStickX, -leftStickY);
-    vTheta = -rightStickX;
+    vTheta = rightStickX;
   }
 
   /**
@@ -105,10 +106,12 @@ public class MecanumDriveChassis
   */
   private void PowerToWheels() {
 
+
     rightFrontDriveSpeed = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
     leftFrontDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) - vTheta;
     rightRearDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) + vTheta;
     leftRearDriveSpeed   = vD * Math.cos(-thetaD + Math.PI / 4) - vTheta;
+
     
     // scales the motor powers while maintaining power ratios.
     List<Double> speeds = Arrays.asList(rightFrontDriveSpeed,

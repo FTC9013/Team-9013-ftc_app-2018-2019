@@ -26,8 +26,8 @@ public class Arm
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    armMotor = hardwareMap.get(DcMotor.class, "aMotor");
-  
+    armMotor = hardwareMap.get(DcMotor.class, "aMotor");  //hub 2 port 1
+    
     armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
   
     armMotor.setDirection(DcMotor.Direction.REVERSE);
