@@ -44,10 +44,10 @@ Hub 2:
 
 Hub 3:
 
-lFront (NeveRest 40 Gearmotor)
-rFront (NeveRest 40 Gearmotor)
-lRear (NeveRest 40 Gearmotor)
-rRear (NeveRest 40 Gearmotor)
+0 = lFront (NeveRest 40 Gearmotor)
+1 = rFront (NeveRest 40 Gearmotor)
+2 = lRear (NeveRest 40 Gearmotor)
+3 = rRear (NeveRest 40 Gearmotor)
 */
 
 @TeleOp(name="Primary Tele-Op", group="Linear Opmode")
@@ -89,7 +89,7 @@ public class TeleOpPrimary extends LinearOpMode {
     while (opModeIsActive()) {
 
       // send joystick inputs to the drive chassis
-      driveChassis.drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+      driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
       if(gamepad1XToggleFlag && !elevatorUp) {
         landingElevator.up();
