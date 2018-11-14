@@ -55,6 +55,15 @@ public class AutonomousPrimary extends LinearOpMode {
 
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
 
+    // make sure the imu gyro is calibrated before continuing.
+    // robot must remain motionless during calibration.
+    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
+    {
+      sleep(50);
+      idle();
+    }
+
+
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
@@ -64,10 +73,6 @@ public class AutonomousPrimary extends LinearOpMode {
 
       //isStopRequested();
 
-      // need to replace joystick input with commands for autonomous.
-
-      // send joystick inputs to the drive chassis
-      driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
 
       // Show the elapsed game time and wheel power.
