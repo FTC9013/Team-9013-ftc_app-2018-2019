@@ -24,7 +24,7 @@ public class Elevator
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    elevatorMotor = hardwareMap.get(DcMotor.class, "eMotor");
+    elevatorMotor = hardwareMap.get(DcMotor.class, "eMotor");  //hub 2 port 0
 
     elevatorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

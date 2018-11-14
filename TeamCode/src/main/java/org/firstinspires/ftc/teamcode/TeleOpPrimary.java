@@ -89,7 +89,7 @@ public class TeleOpPrimary extends LinearOpMode {
     while (opModeIsActive()) {
 
       // send joystick inputs to the drive chassis
-      driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+      driveChassis.drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
 
       if(gamepad1XToggleFlag && !elevatorUp) {
         landingElevator.up();
