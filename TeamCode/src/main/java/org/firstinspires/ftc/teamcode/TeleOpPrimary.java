@@ -58,12 +58,13 @@ public class TeleOpPrimary extends LinearOpMode {
   private MecanumDriveChassis driveChassis;
   private Elevator landingElevator;
   private Arm collectorArm;
-
+  private Collector collector;
+  
   private ElapsedTime runtime = new ElapsedTime();
   // a timer for debouncing all the buttons on the game pad that need debounce.
   ElapsedTime bounceTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   // the time to hold before allowing state change on button.
-  private final double buttonDebounceTime = 0.25;
+  private final double buttonDebounceTime = 0.10;
   // debounce lockout variables.
   private double gamepad1XDebounceLockTime = 0;
 
@@ -76,6 +77,7 @@ public class TeleOpPrimary extends LinearOpMode {
     driveChassis = new MecanumDriveChassis(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
     collectorArm = new Arm(hardwareMap);
+    collector = new Collector(hardwareMap);
 
     boolean gamepad1XToggleFlag = false;
     boolean gamepad1XToggleLock = false;
@@ -90,7 +92,7 @@ public class TeleOpPrimary extends LinearOpMode {
 
       // send joystick inputs to the drive chassis
       driveChassis.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-
+      
       if(gamepad1XToggleFlag && !elevatorUp) {
         landingElevator.up();
         elevatorUp = true;
@@ -123,10 +125,22 @@ public class TeleOpPrimary extends LinearOpMode {
         gamepad1XToggleLock = false;
         gamepad1XDebounceLockTime = bounceTimer.time();
       }
-
-
+      
+      if(gamepad1.right_bumper){
+        collector.collect();
+      }
+      else if(gamepad1.left_bumper){
+        collector.drop();
+      }
+      else{
+        collector.cancel();
+      }
+      
+      
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
+      telemetry.addData("Stick", "Y_left (%.2f), X_left (%.2f)",
+                        gamepad1.left_stick_y, gamepad1.left_stick_x);
       telemetry.update();
     }
   }

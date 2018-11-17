@@ -34,7 +34,7 @@ public class MecanumDriveChassis
   private static double vTheta;
   
   // Robot speed scaling factor (% of joystick input to use)
-  // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
+  // applied uniformly across all joystick inputs to the JoystickToMotion() method.
   private final double speedScale = 0.8;
   
   MecanumDriveChassis(HardwareMap hardwareMap)
@@ -111,11 +111,11 @@ public class MecanumDriveChassis
   private void joystickToMotion( double leftStickY, double leftStickX, double rightStickX ) {
     // determines the translation speed by taking the hypotenuse of the vector created by
     // the X & Y components.
-    vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
+    vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(-leftStickY, 2)), 1);
 
     // Converts the joystick inputs from cartesian to polar from 0 to +/- PI oriented
     // with 0 to the right of the robot. (standard polar plot)
-    thetaD = Math.atan2(leftStickY, leftStickX);
+    thetaD = Math.atan2(-leftStickY, leftStickX);
     // orient to the robot by rotating PI/2 to make the joystick zero at the forward of bot.
     // instead of the right side.
     thetaD = thetaD - Math.PI / 2;

@@ -8,7 +8,7 @@ public class Arm
 {
   private DcMotor armMotor = null;
   
-  static final double armRun = 0.50;
+  static final double armRun = 1.0;
   static final double armStop = 0;
   
   //Maximum height of Elevator.
