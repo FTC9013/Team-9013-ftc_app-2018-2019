@@ -21,11 +21,12 @@ public class MecanumDriveChassis
   private static double rightRearDriveSpeed;
   
   // Robot speed [-1, 1].  (speed in any direction that is not rotational)
-  // does not have any angular component, just velocity component.
-  // combined with the angular component for motion.  Even if angle is 0.
+  // does not have any angular component, just scaler velocity.
+  // combined with the angular component for motion.  Even if angle is 0 (forward).
   private static double vD;
 
-  // Robot angle while moving [0, 2pi]. (angle to displace the center of the bot, no ASDF)
+  // Robot angle while moving [0, 2PI] or [0, +/-PI]. (angle to displace the center of the bot,
+  // ASDF)
   // relative to the direction the bot is facing.
   private static double thetaD;
 
@@ -103,9 +104,9 @@ public class MecanumDriveChassis
    *  Overall this makes the joysticks like mouse & keyboard game controls with
    *  the left stick acting as the WASD keys and the right stick as the mouse.
    *
-   *  V_d = desired robot translation speed.
-   *  theta_d = desired robot translation angle.
-   *  V_theta = desired robot rotational speed.
+   *  vD = desired robot translation speed.
+   *  thetaD = desired robot translation angle.
+   *  vTheta = desired robot rotational speed.
    */
   private void joystickToMotion( double leftStickY, double leftStickX, double rightStickX ) {
     // determines the translation speed by taking the hypotenuse of the vector created by
@@ -120,7 +121,7 @@ public class MecanumDriveChassis
     thetaD = thetaD - Math.PI / 2;
     // simply takes the right stick X value and invert to use as a rotational speed.
     // inverted since we want CW rotation on a positive value.
-    // which is opposite of what PowerToWheels() wants.
+    // which is opposite of what PowerToWheels() wants in polar positive rotation (CCW).
     vTheta = -rightStickX;
   }
 
@@ -129,7 +130,14 @@ public class MecanumDriveChassis
    * for the Mecanum wheels to the rotated axis based on the degree of the wheel offset.
    * In our case 45 degrees or PI/4
    *
-   * translation angle is in radians + is CCW - is CW with ZERO to the forward of the bot.
+   * Assumes X is forward and Z is up then rotate XY PI/4 to align with wheel axises.
+   * placing the positive X axis on the left front wheel and the positive Y axis on the
+   * left rear wheel.
+   *
+   * Rotation is about a positive Z axis pointing UP.
+   * Positive Y is to the left.
+   *
+   * Translation angle is in radians + is CCW - is CW with ZERO to the forward of the bot.
    * I.e. standard rotation about a positive Z axis pointing UP.
    * E.g:
    *    0     = forward
@@ -149,12 +157,10 @@ public class MecanumDriveChassis
   **/
   private void PowerToWheels() {
 
-    // Wheels with force vector perpendicular to the rotated Y axis
     // Motors power = Y component of directional vector
     leftFrontDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) - vTheta;
     rightRearDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) + vTheta;
 
-    // Wheels with force vector perpendicular to the rotated X axis
     // Motors power = X component of directional vector
     rightFrontDriveSpeed = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
     leftRearDriveSpeed   = vD * Math.cos(-thetaD + Math.PI / 4) - vTheta;
