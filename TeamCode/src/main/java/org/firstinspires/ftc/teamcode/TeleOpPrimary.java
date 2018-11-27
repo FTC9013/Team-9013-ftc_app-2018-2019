@@ -102,26 +102,26 @@ public class TeleOpPrimary extends LinearOpMode {
         elevatorUp = false;
       }
 
-      if(gamepad1.dpad_up) {
+      if(gamepad2.dpad_up) {
         collectorArm.lift();
       }
-      if(gamepad1.dpad_down) {
+      if(gamepad2.dpad_down) {
         collectorArm.lower();
       }
 
-      if(gamepad1.x && !gamepad1XToggleFlag && !gamepad1XToggleLock
+      if(gamepad2.x && !gamepad1XToggleFlag && !gamepad1XToggleLock
          && bounceTimeCheck(gamepad1XDebounceLockTime)){
         gamepad1XToggleFlag = true;
         gamepad1XToggleLock = true;
         gamepad1XDebounceLockTime = bounceTimer.time();
       }
-      else if(gamepad1.x && gamepad1XToggleFlag && !gamepad1XToggleLock
+      else if(gamepad2.x && gamepad1XToggleFlag && !gamepad1XToggleLock
               && bounceTimeCheck(gamepad1XDebounceLockTime)){
         gamepad1XToggleFlag = false;
         gamepad1XToggleLock = true;
         gamepad1XDebounceLockTime = bounceTimer.time();
       }
-      if(!gamepad1.x && bounceTimeCheck(gamepad1XDebounceLockTime)) {
+      if(!gamepad2.x && bounceTimeCheck(gamepad1XDebounceLockTime)) {
         gamepad1XToggleLock = false;
         gamepad1XDebounceLockTime = bounceTimer.time();
       }

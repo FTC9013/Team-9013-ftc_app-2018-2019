@@ -8,7 +8,7 @@ public class Arm
 {
   private DcMotor armMotor = null;
   
-  static final double armRun = 1.0;
+  static final double armRun = 0.9;
   static final double armStop = 0;
   
   //Maximum height of Elevator.
@@ -63,8 +63,8 @@ public class Arm
   {
     if(armMoveAllowed()){
       armMotor.setTargetPosition(armMotor.getCurrentPosition()+12);
-      if(armMotor.getTargetPosition() > 72){
-        armMotor.setTargetPosition(72);
+      if(armMotor.getTargetPosition() > 288){
+        armMotor.setTargetPosition(288);
       }
     }
   }
