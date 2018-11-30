@@ -2,14 +2,22 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 
 public class Arm
 {
-  private DcMotor armMotor = null;
+  private DcMotorEx  armMotor = null;
   
-  static final double armRun = 0.9;
+  static final double armRun = 1.0;
   static final double armStop = 0;
+  
+  static final double newP = 15;
+  static final double newI = .5;
+  static final double newD = 3;
+  static final double newF = 0;
+  
   
   //Maximum height of Elevator.
   //static final int top = 72;
@@ -26,46 +34,50 @@ public class Arm
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
-    armMotor = hardwareMap.get(DcMotor.class, "aMotor");  //hub 2 port 1
+    armMotor = (DcMotorEx)hardwareMap.get(DcMotor.class, "aMotor");  //hub 2 port 1
     
     armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
   
-    armMotor.setDirection(DcMotor.Direction.REVERSE);
+    armMotor.setDirection(DcMotor.Direction.FORWARD);
   
     armMotor.setPower(armStop);
+  
+    // get the PID coefficients for the RUN_USING_ENCODER  modes.
+    PIDFCoefficients pidOrig = armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
   
     armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
   
     armMotor.setPower(armRun);
 
     armMotor.setTargetPosition(0);
-
+  
+    // change coefficients using methods included with DcMotorEx class.
+    PIDFCoefficients pidNew = new PIDFCoefficients( newP, newI, newD, newF );
+    armMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidNew);
+  
     armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    
   }
   
-  ElapsedTime armTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-  private final double armHoldOffTime = 0.5;
-  
-  public boolean armMoveAllowed(){
-    return armTimer.time() > armHoldOffTime;
-  }
   void lift()
   {
-    if(armMoveAllowed()){
-      armMotor.setTargetPosition(armMotor.getCurrentPosition()-12);
-      if(armMotor.getTargetPosition() < 0){
-        armMotor.setTargetPosition(0);
-      }
-    }
+    armMotor.setTargetPosition(150);
   }
 
   void lower()
   {
-    if(armMoveAllowed()){
-      armMotor.setTargetPosition(armMotor.getCurrentPosition()+12);
-      if(armMotor.getTargetPosition() > 288){
-        armMotor.setTargetPosition(288);
-      }
-    }
+    armMotor.setTargetPosition(20);
   }
+  
+  int getPosition()
+  {
+    return armMotor.getCurrentPosition();
+  }
+  
+  PIDFCoefficients getPIDFcoefficients()
+  {
+    return armMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+  }
+  
 }
+

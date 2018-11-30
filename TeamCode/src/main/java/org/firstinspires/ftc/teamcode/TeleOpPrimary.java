@@ -136,11 +136,17 @@ public class TeleOpPrimary extends LinearOpMode {
         collector.cancel();
       }
       
-      
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
       telemetry.addData("Stick", "Y_left (%.2f), X_left (%.2f)",
-                        gamepad1.left_stick_y, gamepad1.left_stick_x);
+        gamepad1.left_stick_y, gamepad1.left_stick_x);
+      telemetry.addData("arm position", "encoder count (%d)",
+        collectorArm.getPosition());
+      telemetry.addData("arm PID", "P (%.2f) I (%.2f) D (%.2f) F (%.2f)",
+        collectorArm.getPIDFcoefficients().p,
+        collectorArm.getPIDFcoefficients().i,
+        collectorArm.getPIDFcoefficients().d,
+        collectorArm.getPIDFcoefficients().f);
       telemetry.update();
     }
   }
