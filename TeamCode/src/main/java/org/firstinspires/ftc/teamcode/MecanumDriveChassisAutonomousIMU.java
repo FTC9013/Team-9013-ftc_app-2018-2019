@@ -20,7 +20,16 @@ public class MecanumDriveChassisAutonomousIMU
   private static double leftRearDriveSpeed;
   private static double rightFrontDriveSpeed;
   private static double rightRearDriveSpeed;
-
+  
+  private static double translateAngle;
+  private static double translateDistance;
+  private static double driveDistance;
+  private static double rotateToAngle;
+  private static boolean moving;
+  
+  public static IMUTelemetry IMUTel;
+  
+  
   // Robot speed [-1, 1].  (speed in any direction that is not rotational)
   // does not have any angular component, just scaler velocity.
   // combined with the angular component for motion.  Even if angle is 0 (forward).
@@ -96,42 +105,14 @@ public class MecanumDriveChassisAutonomousIMU
     parameters.loggingEnabled = false;
 
     imu.initialize(parameters);
+  
+    IMUTel = new IMUTelemetry();
   }
 
   boolean IMU_IsCalibrated () {
     return imu.isGyroCalibrated() && imu.isAccelerometerCalibrated();
   }
-
-  /**
-   * Process the joystick values into motion vector.
-   *  Converts the left stick X, Y input into the translation angle and speed
-   *  Converts the right stick X axis into rotation speed.
-   *
-   *  Overall this makes the joysticks like mouse & keyboard game controls with
-   *  the left stick acting as the WASD keys and the right stick as the mouse.
-   *
-   *  vD = desired robot translation speed.
-   *  thetaD = desired robot translation angle.
-   *  vTheta = desired robot rotational speed.
-   */
-  private void joystickToMotion( double leftStickY, double leftStickX, double rightStickX ) {
-    // determines the translation speed by taking the hypotenuse of the vector created by
-    // the X & Y components.
-    vD = Math.min(Math.sqrt(Math.pow(leftStickX, 2) + Math.pow(leftStickY, 2)), 1);
-
-    // Converts the joystick inputs from cartesian to polar from 0 to +/- PI oriented
-    // with 0 to the right of the robot. (standard polar plot)
-    thetaD = Math.atan2(leftStickY, leftStickX);
-    // orient to the robot by rotating PI/2 to make the joystick zero at the forward of bot.
-    // instead of the right side.
-    thetaD = thetaD - Math.PI / 2;
-    // simply takes the right stick X value and invert to use as a rotational speed.
-    // inverted since we want CW rotation on a positive value.
-    // which is opposite of what PowerToWheels() wants in polar positive rotation (CCW).
-    vTheta = -rightStickX;
-  }
-
-
+  
   /**
    * Calculate the power settings and send to the wheels.  This also translates the force
    * for the Mecanum wheels to the rotated axis based on the degree of the wheel offset.
@@ -195,48 +176,37 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setPower(speeds.get(2));
     leftRearDrive.setPower(speeds.get(3));
   }
+  
+  IMUTelemetry drive () {
 
+    
+    
+    
+    // Magic Goes Here!
 
-  /**
-   * Left  Y = forward, backward movement
-   * Left  X = side to side (strafe)
-   * Right X = rotate in place
-   **/
-  void drive(float driveLeftY, float driveLeftX, float driveRightX )
-  {
-    // calculate the vectors multiply input values by scaling factor for max speed.
-    joystickToMotion( driveLeftY * speedScale, driveLeftX * speedScale,
-        driveRightX * speedScale  );
-
+    
+    
     // Math out what to send to the motors and send it.
     PowerToWheels();
+    
+    return IMUTel;
   }
 
-  /**
-  *
-  */
-  void drive(float driveSpeedY, int distance)
-  {
-  
-
+  boolean isMoving() {
+    
+    return moving;
   }
 
-  /**
-  *
-  */
-  void drive(float driveSpeedY, Boolean absRel, int angle)
-  {
-
-
-  }
-
-  /**
-  *
-  */
-  void drive(float driveSpeedY, Boolean absRel, int angle, int distance)
-  {
-
-
+  void move( boolean mode, double angle, double distance ) {
+    
+    if(mode) {    // is it translate?
+      rotateToAngle = angle;
+      driveDistance = distance;
+    }
+    else {    // is translate
+      translateAngle = angle;
+      translateDistance = distance;
+    }
   }
 }
 
