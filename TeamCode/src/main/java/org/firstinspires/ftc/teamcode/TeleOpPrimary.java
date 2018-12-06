@@ -126,10 +126,10 @@ public class TeleOpPrimary extends LinearOpMode {
         gamepad1XDebounceLockTime = bounceTimer.time();
       }
       
-      if(gamepad1.right_bumper){
+      if(gamepad2.right_bumper){
         collector.collect();
       }
-      else if(gamepad1.left_bumper){
+      else if(gamepad2.left_bumper){
         collector.drop();
       }
       else{

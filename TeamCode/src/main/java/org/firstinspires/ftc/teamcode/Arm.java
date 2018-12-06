@@ -61,7 +61,7 @@ public class Arm
   
   void lift()
   {
-    armMotor.setTargetPosition(150);
+    armMotor.setTargetPosition(250);
   }
 
   void lower()
