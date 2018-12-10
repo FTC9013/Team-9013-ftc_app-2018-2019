@@ -66,8 +66,19 @@ public class Arm
 
   void lower()
   {
+    armMotor.setTargetPosition(50);
+  }
+  
+  void drop()
+  {
     armMotor.setTargetPosition(20);
   }
+  
+ // void getArmPosition(){
+  //  return armMotor.getcurre();
+ // }
+  
+  
   
   int getPosition()
   {
