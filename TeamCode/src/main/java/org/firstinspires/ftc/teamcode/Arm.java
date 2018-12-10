@@ -13,12 +13,12 @@ public class Arm
   static final double armRun = 1.0;
   static final double armStop = 0;
   
-  static final double newP = 15;
-  static final double newI = .5;
+  static final double newP = 20;
+  static final double newI = 1;
   static final double newD = 3;
   static final double newF = 0;
   
-  
+  // Golden PIDF: P = 20, I = 1, D = 3, F = 0
   //Maximum height of Elevator.
   //static final int top = 72;
   //Minimum height of Elevator.
@@ -61,7 +61,7 @@ public class Arm
   
   void lift()
   {
-    armMotor.setTargetPosition(250);
+    armMotor.setTargetPosition(230);
   }
 
   void lower()
