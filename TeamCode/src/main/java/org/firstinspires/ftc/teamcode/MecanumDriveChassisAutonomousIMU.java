@@ -94,7 +94,7 @@ public class MecanumDriveChassisAutonomousIMU
 
 
     // Get and initialize the IMU. (we will use the imu on hub id = 3)
-    imu = hardwareMap.get(BNO055IMU.class, "imu");
+    imu = hardwareMap.get(BNO055IMU.class, "imu1");
 
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -197,15 +197,15 @@ public class MecanumDriveChassisAutonomousIMU
     return moving;
   }
 
-  void move( boolean mode, double angle, double distance ) {
+  void move( Leg leg ) {
     
-    if(mode) {    // is it translate?
-      rotateToAngle = angle;
-      driveDistance = distance;
+    if(leg.mode) {    // is it translate?
+      rotateToAngle = leg.angle;
+      driveDistance = leg.distance;
     }
     else {    // is translate
-      translateAngle = angle;
-      translateDistance = distance;
+      translateAngle = leg.angle;
+      translateDistance = leg.distance;
     }
   }
 }

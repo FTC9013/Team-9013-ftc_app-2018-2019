@@ -105,16 +105,13 @@ public class TeleOpPrimary extends LinearOpMode {
         landingElevator.down();
         elevatorUp = false;
       }
-//&& armIsLowering(armLowerTimer)
+
       if(gamepad2.dpad_up ) {
         collectorArm.lift();
-        armLowerTimer = bounceTimer.time();
       }
       if(gamepad2.dpad_down ) {
-        collectorArm.lower();
-        armLowerTimer = bounceTimer.time();
+        collectorArm.lower();;
       }
-      //armIsLowering(armLowerTimer)
 
       if(gamepad2.x && !gamepad1XToggleFlag && !gamepad1XToggleLock
          && bounceTimeCheck(gamepad1XDebounceLockTime)){
@@ -161,10 +158,5 @@ public class TeleOpPrimary extends LinearOpMode {
   // test the debounce lockout against the timer
   private boolean bounceTimeCheck ( double lockoutVariable){
     return bounceTimer.time() > (lockoutVariable + buttonDebounceTime);
-  }
-  
-  // Tests if the current time is past the time the button was pushed + timerDelay
-  private boolean armIsLowering (double pushedTime){
-    return bounceTimer.time() > (pushedTime + timerDelay);
   }
 }

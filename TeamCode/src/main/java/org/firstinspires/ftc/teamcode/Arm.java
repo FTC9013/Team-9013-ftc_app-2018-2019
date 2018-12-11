@@ -13,21 +13,16 @@ public class Arm
   static final double armRun = 1.0;
   static final double armStop = 0;
   
-  static final double newP = 20;
-  static final double newI = 1;
-  static final double newD = 3;
+  static final double newP = 5;
+  static final double newI = 0;
+  static final double newD = 0;
   static final double newF = 0;
   
-  // Golden PIDF: P = 20, I = 1, D = 3, F = 0
-  //Maximum height of Elevator.
-  //static final int top = 72;
-  //Minimum height of Elevator.
-  //static final int bottom = 0;
+  //Maximum height of arm.
+  static final int up = 1000;
+  //Minimum height of arm
+  static final int down = 10;
 
-  //int curPose = 0;
-  //int tarPose = 0;
-  
-  // comment.....
   
   Arm(HardwareMap hardwareMap)
   {
@@ -61,23 +56,13 @@ public class Arm
   
   void lift()
   {
-    armMotor.setTargetPosition(230);
+    armMotor.setTargetPosition(up);
   }
 
   void lower()
   {
-    armMotor.setTargetPosition(50);
+    armMotor.setTargetPosition(down);
   }
-  
-  void drop()
-  {
-    armMotor.setTargetPosition(20);
-  }
-  
- // void getArmPosition(){
-  //  return armMotor.getcurre();
- // }
-  
   
   
   int getPosition()

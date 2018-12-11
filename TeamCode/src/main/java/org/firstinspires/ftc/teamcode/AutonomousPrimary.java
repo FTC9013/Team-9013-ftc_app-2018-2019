@@ -33,11 +33,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
-/*
-
-
- */
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 @Autonomous(name = "AutonomousPrimary", group = "Linear Opmode")
 //@Disabled
@@ -45,8 +44,13 @@ public class AutonomousPrimary extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
-
+  private Elevator landingElevator;
   private ElapsedTime runtime = new ElapsedTime();
+  
+  private Queue<Leg> path = new LinkedList<>();
+ 
+// path.add( new Leg(true, 1, 1 )); 
+  
   
   @Override
   public void runOpMode() {
@@ -54,20 +58,27 @@ public class AutonomousPrimary extends LinearOpMode {
     telemetry.update();
 
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
+    landingElevator = new Elevator(hardwareMap);
 
-    // make sure the imu gyro is calibrated before continuing.
-    // robot must remain motionless during calibration.
-    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
-    {
-      sleep(50);
-      idle();
-    }
+    
+    
+    
+  // make sure the imu gyro is calibrated before continuing.
+  // robot must remain motionless during calibration.
+  //  while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
+  //  {
+  //    sleep(50);
+  //   idle();
+  // }
 
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
 
+    // land the bot
+    landingElevator.up();
+    
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 

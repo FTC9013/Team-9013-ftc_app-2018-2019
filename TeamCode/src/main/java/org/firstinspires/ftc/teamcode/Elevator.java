@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 public class Elevator
 {
   private DcMotor elevatorMotor = null;
@@ -12,7 +11,7 @@ public class Elevator
   static final double elevatorStop = 0;
 
   //Maximum height of Elevator.
-  static final int topFloor = 1100;
+  static final int topFloor = 1225;
   //Minimum height of Elevator.
   static final int lobbyFloor = 0;
 
