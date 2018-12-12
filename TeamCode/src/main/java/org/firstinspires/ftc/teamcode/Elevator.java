@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import static java.lang.Math.abs;
+
 public class Elevator
 {
   private DcMotor elevatorMotor = null;
@@ -14,6 +16,9 @@ public class Elevator
   static final int topFloor = 1225;
   //Minimum height of Elevator.
   static final int lobbyFloor = 0;
+
+  // +/- counts to say the motor is stopped a the target position.
+  static final int closeEnough = 10;
 
 
   // comment.....
@@ -40,17 +45,20 @@ public class Elevator
     elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
-   void up()   {
-       
-         elevatorMotor.setTargetPosition(topFloor);
-       
-    
-   }
+    void up()   {
+      elevatorMotor.setTargetPosition(topFloor);
+    }
 
-   void down()   {
-    
-       elevatorMotor.setTargetPosition(lobbyFloor);
-     
-     
-   }
+    void down()   {
+      elevatorMotor.setTargetPosition(lobbyFloor);
+    }
+
+    boolean isMoving()   {
+      // is the current position is within 'closeEnough' counts of the set point position
+      // could use the motor method isBusy but not sure how it works... may be too sensitive.
+      return abs( elevatorMotor.getCurrentPosition()
+                 - elevatorMotor.getTargetPosition()) > closeEnough;
+    }
+
+
 }

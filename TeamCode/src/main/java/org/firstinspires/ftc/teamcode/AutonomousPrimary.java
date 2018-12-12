@@ -33,24 +33,37 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.Collection;
-import java.util.Iterator;
+
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaRoverRuckus;
+import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
+
 import java.util.LinkedList;
 import java.util.Queue;
 
 @Autonomous(name = "AutonomousPrimary", group = "Linear Opmode")
+
 //@Disabled
 public class AutonomousPrimary extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
+  private IMUTelemetry IMUTel;
   private Elevator landingElevator;
   private ElapsedTime runtime = new ElapsedTime();
-  
-  private Queue<Leg> path = new LinkedList<>();
- 
-// path.add( new Leg(true, 1, 1 )); 
-  
+
+  VuforiaLocalizer vuforia;
   
   @Override
   public void runOpMode() {
@@ -60,38 +73,63 @@ public class AutonomousPrimary extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
 
-    
-    
-    
-  // make sure the imu gyro is calibrated before continuing.
-  // robot must remain motionless during calibration.
-  //  while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
-  //  {
-  //    sleep(50);
-  //   idle();
-  // }
+    /*
+     * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
+     * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
+     */
 
+    //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+    //    "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+    // OR...  Do Not Activate the Camera Monitor View, to save power
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+    parameters.vuforiaLicenseKey = "ASPJ+XX/////AAAAGVoUw33gakWRlcLvnWu+vK4/0BincNFIHCnW6Vxig4SR4t7P9G9oRc/LemAnahIp4wXtyWHVoSaLI/7EIpxN/3Tq08Pgs6zsO9pxNukXh8cm7bWcVJ3/RCqAyZReB8kD2duQoOqUlfG9vjVzcLcdu+SFkQP0MkHR8jviuZX30Rp2TWCAtmR/ecjzb6uHPRvkw4IfpWhppDv0TVkCaCvkeMNXI+cR50ythnyVKtZRRs9f0tb3abDhQ1RaFqF9ljyTyzUIgd6M+LnF3fEPJXYvgJSYk4jYyzFf5ATDK93sv8Iem9jNN6zcmKydWFET/vBWhyRLmaU7EkFdseNeWgW5Hgc+G33OeYdPbHy7DKVUB/vg";
+
+    Queue<Leg> travelPath = new LinkedList<>();
+
+    // This is where the travel path is built:
+    // Each leg of the trip is added to the queue in this code block.
+    // Later, as the opmode runs, the legs are read out and sent to the drive base
+    // for execution.
+    //
+    // mode:     true = turn and drive, false = translate
+    // angle:    the desired angle of travel relative to the current bot position and orientation.
+    // distance: the distance to travel in centimeters.
+    //
+    travelPath.add(new Leg(false, -Math.PI / 2, 15));
+    //travelPath.add(new Leg(true, 1, 1));
+    //travelPath.add(new Leg(true, 1, 1));
+    //travelPath.add(new Leg(true, 1, 1));
+
+    // make sure the imu gyro is calibrated before continuing.
+    // robot must remain motionless during calibration.
+    //  while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
+    //  {
+    //    sleep(50);
+    //   idle();
+    // }
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
 
-    // land the bot
+    // start to land the bot
     landingElevator.up();
     
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 
-      //isStopRequested();
+      // wait for the bot to land (elevator no longer moving)
+      while (landingElevator.isMoving());
 
-      
-      
-      
-      
-      
-      
-      
+      // if not driving and there are still legs in the travelPath then send the next leg.
+      if(!driveChassis.isMoving() & travelPath.size() != 0 ){
+        driveChassis.move( travelPath.remove() );
+      }
 
+      IMUTel = driveChassis.drive();
 
       // Show the elapsed game time and wheel power.
       telemetry.addData("Status", "Run Time: " + runtime.toString());

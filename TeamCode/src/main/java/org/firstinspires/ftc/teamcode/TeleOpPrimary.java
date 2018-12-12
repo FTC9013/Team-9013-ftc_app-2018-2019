@@ -146,11 +146,11 @@ public class TeleOpPrimary extends LinearOpMode {
         gamepad1.left_stick_y, gamepad1.left_stick_x);
       telemetry.addData("arm position", "encoder count (%d)",
         collectorArm.getPosition());
-      telemetry.addData("arm PID", "P (%.2f) I (%.2f) D (%.2f) F (%.2f)",
-        collectorArm.getPIDFcoefficients().p,
-        collectorArm.getPIDFcoefficients().i,
-        collectorArm.getPIDFcoefficients().d,
-        collectorArm.getPIDFcoefficients().f);
+//      telemetry.addData("arm PID", "P (%.2f) I (%.2f) D (%.2f) F (%.2f)",
+//        collectorArm.getPIDFcoefficients().p,
+//        collectorArm.getPIDFcoefficients().i,
+//        collectorArm.getPIDFcoefficients().d,
+//        collectorArm.getPIDFcoefficients().f);
       telemetry.update();
     }
   }

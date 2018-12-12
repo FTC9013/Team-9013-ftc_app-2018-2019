@@ -176,7 +176,12 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setPower(speeds.get(2));
     leftRearDrive.setPower(speeds.get(3));
   }
-  
+
+  /**
+   * this is called every pass of the opmode while() loop to update power to the wheels
+   * and return the current telemetry.
+   * @return
+   */
   IMUTelemetry drive () {
 
     
