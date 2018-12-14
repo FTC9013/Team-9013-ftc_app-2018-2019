@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -67,8 +68,6 @@ public class AutonomousPrimary extends LinearOpMode {
   
   @Override
   public void runOpMode() {
-    telemetry.addData("Status", "Initialized");
-    telemetry.update();
 
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
@@ -96,20 +95,21 @@ public class AutonomousPrimary extends LinearOpMode {
     //
     // mode:     true = turn and drive, false = translate
     // angle:    the desired angle of travel relative to the current bot position and orientation.
+    //           in DEGREES
     // distance: the distance to travel in centimeters.
     //
-    travelPath.add(new Leg(false, -Math.PI / 2, 15));
+    travelPath.add(new Leg(false, -90, 15));
     //travelPath.add(new Leg(true, 1, 1));
     //travelPath.add(new Leg(true, 1, 1));
     //travelPath.add(new Leg(true, 1, 1));
 
     // make sure the imu gyro is calibrated before continuing.
     // robot must remain motionless during calibration.
-    //  while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
-    //  {
-    //    sleep(50);
-    //   idle();
-    // }
+    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
+    {
+      sleep(50);
+      idle();
+    }
 
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
@@ -131,8 +131,13 @@ public class AutonomousPrimary extends LinearOpMode {
 
       IMUTel = driveChassis.drive();
 
-      // Show the elapsed game time and wheel power.
+      // Show the elapsed game time.
       telemetry.addData("Status", "Run Time: " + runtime.toString());
+      telemetry.addLine().addData("imu status", IMUTel.imuStatus)
+          .addData("calib. status", IMUTel.calStatus);
+      telemetry.addLine().addData("Z= ", IMUTel.zTheta )
+          .addData("Y= ", IMUTel.yTheta )
+          .addData("X= ", IMUTel.xTheta );
       telemetry.update();
     }
   }
