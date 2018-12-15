@@ -38,6 +38,8 @@ public class MecanumDriveChassisAutonomousIMU
   private static double translateDistance;
   private static double driveDistance;
   private static double rotateToAngle;
+  private static float startAngle;
+  private static boolean driveMode;  // leg drive mode
   private static boolean moving;
   
   public static IMUTelemetry IMUTel;
@@ -59,6 +61,9 @@ public class MecanumDriveChassisAutonomousIMU
   // Robot speed scaling factor (% of joystick input to use)
   // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
   private final double speedScale = 0.8;
+  
+  // speed for a turn
+  private final double turnSpeed = 0.3;
 
   MecanumDriveChassisAutonomousIMU(HardwareMap hardwareMap)
   {
@@ -105,7 +110,27 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setPower(rightRearDriveSpeed);
     leftRearDrive.setPower(leftRearDriveSpeed);
 
+    
+    // temporary kludge
+  
+    leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+  
+    leftFrontDrive.setTargetPosition(0);
+    leftRearDrive.setTargetPosition(0);
+    rightFrontDrive.setTargetPosition(0);
+    rightRearDrive.setTargetPosition(0);
+    
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+    
+    
+    
     // Get and initialize the IMU. (we will use the imu on hub id = 3)
     imu = hardwareMap.get(BNO055IMU.class, "imu1");
 
@@ -116,7 +141,7 @@ public class MecanumDriveChassisAutonomousIMU
     // Set up the parameters with which we will use our IMU. Note that integration
     // algorithm here just reports accelerations to the logcat log; it doesn't actually
     // provide positional information.
-    parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+    parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
     parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
 //    parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
     parameters.loggingEnabled      = false;
@@ -203,28 +228,76 @@ public class MecanumDriveChassisAutonomousIMU
    * @return
    */
   IMUTelemetry drive () {
+  
+  angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+  
+  if(driveMode) { // turn and drive
 
     
-    
+  
+  
+  }
+  else {  // translating
+  
+  }
     
     // Magic Goes Here!
-
-    
+  
     
     // Math out what to send to the motors and send it.
-    PowerToWheels();
-    
+    //PowerToWheels();
+    composeTelemetry();
     return IMUTel;
   }
-
+  
+  /**
+   * returns ture if the bot is still moving
+   */
   boolean isMoving() {
-    
-    return moving;
+//    return moving;
+  
+    return rightFrontDrive.isBusy();
   }
-
+  
+  
+  /**
+   * loads a movement leg into the target variables.
+   */
   void move( Leg leg ) {
+  
+    // KLUDGE GOES HERE...
+  
+  
+    rightFrontDrive.setPower(turnSpeed);
+    leftFrontDrive.setPower(turnSpeed);
+    rightRearDrive.setPower(turnSpeed);
+    leftRearDrive.setPower(turnSpeed);
     
-    if(leg.mode) {    // is it translate?
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+  
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    // reset start angle from gyro
+//    startAngle = angles.firstAngle;  // zero reference for the leg
+    // should be piecewise...
+    
+    if(driveMode) {    // is it turn and drive (true)?
       rotateToAngle = leg.angle;
       driveDistance = leg.distance;
     }
@@ -239,80 +312,16 @@ public class MecanumDriveChassisAutonomousIMU
   //----------------------------------------------------------------------------------------------
 
   void composeTelemetry() {
-
-    // At the beginning of each telemetry update, grab a bunch of data
-    // from the IMU that we will then display in separate lines.
-    telemetry.addAction(new Runnable() { @Override public void run()
-    {
-      // Acquiring the angles is relatively expensive; we don't want
-      // to do that in each of the three items that need that info, as that's
-      // three times the necessary expense.
-      angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-      gravity  = imu.getGravity();
-    }
-    });
-
-    telemetry.addLine()
-        .addData("status", new Func<String>() {
-          @Override public String value() {
-            return imu.getSystemStatus().toShortString();
-          }
-        })
-        .addData("calib", new Func<String>() {
-          @Override public String value() {
-            return imu.getCalibrationStatus().toString();
-          }
-        });
-
-    telemetry.addLine()
-        .addData("heading", new Func<String>() {
-          @Override public String value() {
-            return formatAngle(angles.angleUnit, angles.firstAngle);
-          }
-        })
-        .addData("roll", new Func<String>() {
-          @Override public String value() {
-            return formatAngle(angles.angleUnit, angles.secondAngle);
-          }
-        })
-        .addData("pitch", new Func<String>() {
-          @Override public String value() {
-            return formatAngle(angles.angleUnit, angles.thirdAngle);
-          }
-        });
-
-    telemetry.addLine()
-        .addData("grvty", new Func<String>() {
-          @Override public String value() {
-            return gravity.toString();
-          }
-        })
-        .addData("mag", new Func<String>() {
-          @Override public String value() {
-            return String.format(Locale.getDefault(), "%.3f",
-                Math.sqrt(gravity.xAccel*gravity.xAccel
-                    + gravity.yAccel*gravity.yAccel
-                    + gravity.zAccel*gravity.zAccel));
-          }
-        });
+ 
+    IMUTel.imuStatus = imu.getSystemStatus().toShortString();
+    IMUTel.calStatus = imu.getCalibrationStatus().toString();
+    IMUTel.zTheta = String.format(Locale.getDefault(), "%.2f", angles.firstAngle);
+    IMUTel.yTheta = "!";
+    IMUTel.xTheta = "!";
+//    IMUTel.zTheta = formatAngle(angles.angleUnit, angles.firstAngle);
+//    IMUTel.yTheta = formatAngle(angles.angleUnit, angles.secondAngle);
+//    IMUTel.xTheta = formatAngle(angles.angleUnit, angles.thirdAngle);
+  
   }
-
-  //----------------------------------------------------------------------------------------------
-  // Formatting
-  //----------------------------------------------------------------------------------------------
-
-  String formatAngle(AngleUnit angleUnit, double angle) {
-    return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-  }
-
-  String formatDegrees(double degrees){
-    return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-  }
-
-
-
-
-
-
 }
 

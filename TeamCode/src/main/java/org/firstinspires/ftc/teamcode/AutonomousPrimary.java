@@ -128,6 +128,10 @@ public class AutonomousPrimary extends LinearOpMode {
       if(!driveChassis.isMoving() & travelPath.size() != 0 ){
         driveChassis.move( travelPath.remove() );
       }
+      
+      while (!isStopRequested() && driveChassis.isMoving());
+  
+      landingElevator.down();
 
       IMUTel = driveChassis.drive();
 
