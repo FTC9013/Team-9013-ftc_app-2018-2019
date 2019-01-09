@@ -111,7 +111,8 @@ public class MecanumDriveChassisAutonomousIMU
     leftRearDrive.setPower(leftRearDriveSpeed);
 
     
-    // temporary kludge
+    // start of temporary kludge ******************
+    // allows quick shuttle by encoder after landing the bot.
   
     leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -128,7 +129,7 @@ public class MecanumDriveChassisAutonomousIMU
     rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-    
+    // end of temporary kludge ******************
     
     
     // Get and initialize the IMU. (we will use the imu on hub id = 3)
@@ -264,8 +265,10 @@ public class MecanumDriveChassisAutonomousIMU
    * loads a movement leg into the target variables.
    */
   void move( Leg leg ) {
-  
-    // KLUDGE GOES HERE...
+
+
+    // start of temporary kludge ******************
+    // allows quick shuttle by encoder after landing the bot.
   
   
     rightFrontDrive.setPower(turnSpeed);
@@ -282,9 +285,11 @@ public class MecanumDriveChassisAutonomousIMU
     leftRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     rightRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-  
-  
-  
+
+
+
+    // end of temporary kludge ******************
+
   
   
   
@@ -294,7 +299,7 @@ public class MecanumDriveChassisAutonomousIMU
   
   
     // reset start angle from gyro
-//    startAngle = angles.firstAngle;  // zero reference for the leg
+    // startAngle = angles.firstAngle;  // zero reference for the leg
     // should be piecewise...
     
     if(driveMode) {    // is it turn and drive (true)?

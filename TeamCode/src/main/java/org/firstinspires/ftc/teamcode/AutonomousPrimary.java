@@ -29,6 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,12 +49,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
@@ -66,14 +69,25 @@ public class AutonomousPrimary extends LinearOpMode {
   private Elevator landingElevator;
   private ElapsedTime runtime = new ElapsedTime();
 
+  private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+  private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+  private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+
   private static final float mmPerInch        = 25.4f;
   private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
   private static final float mmTargetHeight   = (6) * mmPerInch; // the height of the center of the target image above the floor
 
   OpenGLMatrix lastLocation = null;
   private boolean targetVisible = false;
-  VuforiaLocalizer vuforia;
+
+  private VuforiaLocalizer vuforia;
   WebcamName webcamName;
+
+  /**
+   * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
+   * Detection engine.
+   */
+  private TFObjectDetector tfod;
 
 
   @Override
@@ -92,16 +106,25 @@ public class AutonomousPrimary extends LinearOpMode {
      */
     int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
         "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
+    // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
     // OR...  Do Not Activate the Camera Monitor View, to save power
-    // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+    // OR Tensor flow
+    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(cameraMonitorViewId);
+    // TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters();
 
     parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
     parameters.cameraName = webcamName;
     parameters.useExtendedTracking = false;
 
     vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+    tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+    tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+
+
 
     /**
      * Load the data sets that for the trackable objects we wish to track. */
@@ -262,45 +285,94 @@ public class AutonomousPrimary extends LinearOpMode {
 
 
     /** Start tracking the data sets we care about. */
-    targetsRoverRuckus.activate();
+    // for trackables.
+    // targetsRoverRuckus.activate();
 
-    while (opModeIsActive()) {
+    if (opModeIsActive()) {
+      /** Activate Tensor Flow Object Detection. */
+      if (tfod != null) {
+        tfod.activate();
+      }
 
-      // check all the trackable target to see which one (if any) is visible.
-      targetVisible = false;
-      for (VuforiaTrackable trackable : allTrackables) {
-        if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-          telemetry.addData("Visible Target", trackable.getName());
-          targetVisible = true;
 
-          // getUpdatedRobotLocation() will return null if no new information is available since
-          // the last time that call was made, or if the trackable is not currently visible.
-          OpenGLMatrix robotLocationTransform = (
-              (VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-          if (robotLocationTransform != null) {
-            lastLocation = robotLocationTransform;
+      while (opModeIsActive()) {
+
+    // Tensor Flow Code  *************
+        if (tfod != null) {
+          // getUpdatedRecognitions() will return null if no new information is available since
+          // the last time that call was made.
+          List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+          if (updatedRecognitions != null) {
+            telemetry.addData("# Object Detected", updatedRecognitions.size());
+            if (updatedRecognitions.size() == 3) {
+              int goldMineralX = -1;
+              int silverMineral1X = -1;
+              int silverMineral2X = -1;
+              for (Recognition recognition : updatedRecognitions) {
+                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                  goldMineralX = (int) recognition.getLeft();
+                } else if (silverMineral1X == -1) {
+                  silverMineral1X = (int) recognition.getLeft();
+                } else {
+                  silverMineral2X = (int) recognition.getLeft();
+                }
+              }
+              if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                  telemetry.addData("Gold Mineral Position", "Left");
+                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                  telemetry.addData("Gold Mineral Position", "Right");
+                } else {
+                  telemetry.addData("Gold Mineral Position", "Center");
+                }
+              }
+            }
+            telemetry.update();
           }
-          break;
+        }
+        if (tfod != null) {
+          tfod.shutdown();
         }
       }
+// TRACKABLES Code **************
+//      // check all the trackable target to see which one (if any) is visible.
+//      targetVisible = false;
+//      for (VuforiaTrackable trackable : allTrackables) {
+//        if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+//          telemetry.addData("Visible Target", trackable.getName());
+//          targetVisible = true;
+//
+//          // getUpdatedRobotLocation() will return null if no new information is available since
+//          // the last time that call was made, or if the trackable is not currently visible.
+//          OpenGLMatrix robotLocationTransform = (
+//              (VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+//          if (robotLocationTransform != null) {
+//            lastLocation = robotLocationTransform;
+//          }
+//          break;
+//        }
+//      }
+//
+//      // Provide feedback as to where the robot is located (if we know).
+//      if (targetVisible) {
+//        // express position (translation) of robot in inches.
+//        VectorF translation = lastLocation.getTranslation();
+//        telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+//            translation.get(0) / mmPerInch, translation.get(1)
+//                                                / mmPerInch, translation.get(2) / mmPerInch);
+//
+//        // express the rotation of the robot in degrees.
+//        Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+//        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f",
+//            rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+//      }
+//      else {
+//        telemetry.addData("Visible Target", "none");
+//      }
+//      telemetry.update();
 
-      // Provide feedback as to where the robot is located (if we know).
-      if (targetVisible) {
-        // express position (translation) of robot in inches.
-        VectorF translation = lastLocation.getTranslation();
-        telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-            translation.get(0) / mmPerInch, translation.get(1)
-                                                / mmPerInch, translation.get(2) / mmPerInch);
 
-        // express the rotation of the robot in degrees.
-        Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f",
-            rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-      }
-      else {
-        telemetry.addData("Visible Target", "none");
-      }
-      telemetry.update();
+
 
 //    // start to land the bot
 //    landingElevator.up();
