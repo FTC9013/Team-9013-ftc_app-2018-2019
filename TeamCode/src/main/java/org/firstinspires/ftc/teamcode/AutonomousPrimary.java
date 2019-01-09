@@ -42,8 +42,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -81,12 +79,6 @@ public class AutonomousPrimary extends LinearOpMode {
   private boolean targetVisible = false;
 
   private VuforiaLocalizer vuforia;
-  WebcamName webcamName;
-
-  /**
-   * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
-   * Detection engine.
-   */
   private TFObjectDetector tfod;
 
 
@@ -96,52 +88,31 @@ public class AutonomousPrimary extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
 
-    /*
-     * Retrieve the camera we are to use.
-     */
-    webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
-    /*
-     * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
-     * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
-     */
-    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-        "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    initVuforia();
 
-    // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-    // OR...  Do Not Activate the Camera Monitor View, to save power
-    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-    // OR Tensor flow
-    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(cameraMonitorViewId);
-    // TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters();
-
-    parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
-    parameters.cameraName = webcamName;
-    parameters.useExtendedTracking = false;
-
-    vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-    tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-    tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-
+    if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+      initTfod();
+    } else {
+      telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+    }
 
 
     /**
      * Load the data sets that for the trackable objects we wish to track. */
-    VuforiaTrackables targetsRoverRuckus = vuforia.loadTrackablesFromAsset("RoverRuckus");
-
-    VuforiaTrackable blueRover = targetsRoverRuckus.get(0);
-    blueRover.setName("Blue-Rover");
-    VuforiaTrackable redFootprint = targetsRoverRuckus.get(1);
-    redFootprint.setName("Red-Footprint");
-    VuforiaTrackable frontCraters = targetsRoverRuckus.get(2);
-    frontCraters.setName("Front-Craters");
-    VuforiaTrackable backSpace = targetsRoverRuckus.get(3);
-    backSpace.setName("Back-Space");
-
-    /** For convenience, gather together all the trackable objects in one easily-iterable collection */
-    List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
-    allTrackables.addAll(targetsRoverRuckus);
+//    VuforiaTrackables targetsRoverRuckus = vuforia.loadTrackablesFromAsset("RoverRuckus");
+//
+//    VuforiaTrackable blueRover = targetsRoverRuckus.get(0);
+//    blueRover.setName("Blue-Rover");
+//    VuforiaTrackable redFootprint = targetsRoverRuckus.get(1);
+//    redFootprint.setName("Red-Footprint");
+//    VuforiaTrackable frontCraters = targetsRoverRuckus.get(2);
+//    frontCraters.setName("Front-Craters");
+//    VuforiaTrackable backSpace = targetsRoverRuckus.get(3);
+//    backSpace.setName("Back-Space");
+//
+//    /** For convenience, gather together all the trackable objects in one easily-iterable collection */
+//    List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+//    allTrackables.addAll(targetsRoverRuckus);
 
     /**
      * In order for localization to work, we need to tell the system where each target is on the field, and
@@ -168,11 +139,11 @@ public class AutonomousPrimary extends LinearOpMode {
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Then, we translate it along the Y axis to the blue perimeter wall.
      */
-    OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
-       .translation(0, mmFTCFieldWidth, mmTargetHeight)
-       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-           0, 0));
-    blueRover.setLocation(blueRoverLocationOnField);
+//    OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
+//       .translation(0, mmFTCFieldWidth, mmTargetHeight)
+//       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
+//           0, 0));
+//    blueRover.setLocation(blueRoverLocationOnField);
 
     /**
      * To place the RedFootprint target in the middle of the red perimeter wall:
@@ -181,11 +152,11 @@ public class AutonomousPrimary extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the negative Y axis to the red perimeter wall.
      */
-    OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
-       .translation(0, -mmFTCFieldWidth, mmTargetHeight)
-       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-           0, 180));
-    redFootprint.setLocation(redFootprintLocationOnField);
+//    OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
+//       .translation(0, -mmFTCFieldWidth, mmTargetHeight)
+//       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
+//           0, 180));
+//    redFootprint.setLocation(redFootprintLocationOnField);
 
     /**
      * To place the FrontCraters target in the middle of the front perimeter wall:
@@ -194,11 +165,11 @@ public class AutonomousPrimary extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the negative X axis to the front perimeter wall.
      */
-    OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
-       .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
-       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-           0 , 90));
-    frontCraters.setLocation(frontCratersLocationOnField);
+//    OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
+//       .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
+//       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
+//           0 , 90));
+//    frontCraters.setLocation(frontCratersLocationOnField);
 
     /**
      * To place the BackSpace target in the middle of the back perimeter wall:
@@ -207,11 +178,11 @@ public class AutonomousPrimary extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the X axis to the back perimeter wall.
      */
-    OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
-       .translation(mmFTCFieldWidth, 0, mmTargetHeight)
-       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-           0, -90));
-    backSpace.setLocation(backSpaceLocationOnField);
+//    OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
+//       .translation(mmFTCFieldWidth, 0, mmTargetHeight)
+//       .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
+//           0, -90));
+//    backSpace.setLocation(backSpaceLocationOnField);
 
     /**
      * Create a transformation matrix describing where the phone is on the robot.
@@ -237,22 +208,22 @@ public class AutonomousPrimary extends LinearOpMode {
      * but 110 mm forward of the middle of the robot, and 200 mm above ground level.
      */
 
-    final int CAMERA_FORWARD_DISPLACEMENT  = 0;   // eg: Camera is 110 mm in front of robot center
-    final int CAMERA_VERTICAL_DISPLACEMENT = 0;   // eg: Camera is 200 mm above ground
-    final int CAMERA_LEFT_DISPLACEMENT     = 0;   // eg: Camera is ON the robot's center line
-
-    OpenGLMatrix cameraLocationOnRobot = OpenGLMatrix
-            .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
-                CAMERA_VERTICAL_DISPLACEMENT).multiplied(Orientation.getRotationMatrix(
-           EXTRINSIC, YZX, DEGREES, -90,0, 0));
-
-    /**  Let all the trackable listeners know where the camera is.  */
-    for (VuforiaTrackable trackable : allTrackables)
-    {
-      ((VuforiaTrackableDefaultListener)trackable.getListener()).setCameraLocationOnRobot(
-          parameters.cameraName,  cameraLocationOnRobot );
-    }
-
+//    final int CAMERA_FORWARD_DISPLACEMENT  = 0;   // eg: Camera is 110 mm in front of robot center
+//    final int CAMERA_VERTICAL_DISPLACEMENT = 0;   // eg: Camera is 200 mm above ground
+//    final int CAMERA_LEFT_DISPLACEMENT     = 0;   // eg: Camera is ON the robot's center line
+//
+//    OpenGLMatrix cameraLocationOnRobot = OpenGLMatrix
+//            .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
+//                CAMERA_VERTICAL_DISPLACEMENT).multiplied(Orientation.getRotationMatrix(
+//           EXTRINSIC, YZX, DEGREES, -90,0, 0));
+//
+//    /**  Let all the trackable listeners know where the camera is.  */
+//    for (VuforiaTrackable trackable : allTrackables)
+//    {
+//      ((VuforiaTrackableDefaultListener)trackable.getListener()).setCameraLocationOnRobot(
+//          parameters.cameraName,  cameraLocationOnRobot );
+//    }
+//
 
     Queue<Leg> travelPath = new LinkedList<>();
 
@@ -415,4 +386,54 @@ public class AutonomousPrimary extends LinearOpMode {
   String format(OpenGLMatrix transformationMatrix) {
     return transformationMatrix.formatAsTransform();
   }
+
+  /**
+   * Initialize the Vuforia localization engine.
+   */
+  private void initVuforia() {
+    /*
+     * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+     */
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+    parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
+    parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+    //parameters.useExtendedTracking = false;
+
+    //  Instantiate the Vuforia engine
+    vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+    // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+  }
+
+  /**
+   * Initialize the Tensor Flow Object Detection engine.
+   */
+  private void initTfod() {
+    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+        "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(cameraMonitorViewId);
+
+    tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+    tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
