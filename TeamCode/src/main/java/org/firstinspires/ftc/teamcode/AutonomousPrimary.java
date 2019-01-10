@@ -89,16 +89,14 @@ public class AutonomousPrimary extends LinearOpMode {
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 
-      // wait for the bot to land (elevator no longer moving)
-      while (landingElevator.isMoving()) ;
-
       // if not driving and there are still legs in the travelPath then send the next leg.
       if (!driveChassis.isMoving() & travelPath.size() != 0) {
         driveChassis.move(travelPath.remove());
       }
 
-      while (!isStopRequested() && driveChassis.isMoving()) ;
+      while (!isStopRequested() && driveChassis.isMoving());
 
+      // put the elevator back down after the autonomous mode.
       landingElevator.down();
 
       IMUTel = driveChassis.drive();

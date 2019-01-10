@@ -46,12 +46,20 @@ public class Elevator
     elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
-    void up()   {
+    void up()
+    {
+      // send the elevator up (land the bot)
       elevatorMotor.setTargetPosition(topFloor);
+      // wait for the elevator to get to the target
+      while( isMoving());
     }
 
-    void down()   {
+    void down()
+    {
+      // send the elevator down (raise the bot)
       elevatorMotor.setTargetPosition(lobbyFloor);
+      // wait for the elevator to get to the target
+      while( isMoving());
     }
 
     boolean isMoving()   {
@@ -60,9 +68,10 @@ public class Elevator
       return abs( elevatorMotor.getCurrentPosition()
                  - elevatorMotor.getTargetPosition()) > closeEnough;
     }
-  
+
+    // used by the LowerElevator Opmode to move the elevator down if
+    // it is left up for some reason
     void resetDown()   {
       elevatorMotor.setTargetPosition(resetDown);
     }
-
 }

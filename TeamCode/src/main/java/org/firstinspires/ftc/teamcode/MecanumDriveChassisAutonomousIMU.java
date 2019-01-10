@@ -5,7 +5,6 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -256,8 +255,9 @@ public class MecanumDriveChassisAutonomousIMU
    */
   boolean isMoving() {
 //    return moving;
-  
-    return rightFrontDrive.isBusy();
+    return rightFrontDrive.isBusy() || leftFrontDrive.isBusy()
+           || rightRearDrive.isBusy()
+           || leftRearDrive.isBusy();
   }
   
   
@@ -303,11 +303,27 @@ public class MecanumDriveChassisAutonomousIMU
       translateDistance = leg.distance;
     }
   }
-  
+
+  void moveUnhook() {
+
+    setMoveSpeed();
+
+    // shuttle off the hook
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    while (isMoving()) ;
+  }
+
+
   void moveLeftGold() {
   
     setMoveSpeed();
-    
+
+    // shuttle off the hook
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(-500);
     leftRearDrive.setTargetPosition(500);
@@ -315,7 +331,8 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setTargetPosition(-500);
     runToPosition();
     while (isMoving());
-    
+
+    // Move forward
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(2500);
     leftRearDrive.setTargetPosition(2500);
@@ -323,20 +340,42 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setTargetPosition(2500);
     runToPosition();
     while (isMoving());
-    
+
+    // Align with mineral (park in front of it)
+    // shuttle left
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(-500);
     leftRearDrive.setTargetPosition(500);
     rightFrontDrive.setTargetPosition(500);
     rightRearDrive.setTargetPosition(-500);
     runToPosition();
-    
+    while (isMoving());
+
+    // Move forward and push the mineral
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+
+    // Move backwards from the mineral
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-2500);
+    leftRearDrive.setTargetPosition(-2500);
+    rightFrontDrive.setTargetPosition(-2500);
+    rightRearDrive.setTargetPosition(-2500);
+    runToPosition();
+    while (isMoving());
+
   }
   
   void moveCenterGold() {
   
     setMoveSpeed();
-    
+
+    // shuttle off the hook
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(-500);
     leftRearDrive.setTargetPosition(500);
@@ -344,7 +383,8 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setTargetPosition(-500);
     runToPosition();
     while (isMoving());
-    
+
+    // Move forward
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(2500);
     leftRearDrive.setTargetPosition(2500);
@@ -352,28 +392,17 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setTargetPosition(2500);
     runToPosition();
     while (isMoving());
-    
+
+    // Align with mineral (park in front of it)
+    // shuttle right
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(500);
     leftRearDrive.setTargetPosition(-500);
     rightFrontDrive.setTargetPosition(-500);
     rightRearDrive.setTargetPosition(500);
     runToPosition();
-  
-  }
-  
-  void moveRightGold() {
-  
-    setMoveSpeed();
-    
-    stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(-500);
-    leftRearDrive.setTargetPosition(500);
-    rightFrontDrive.setTargetPosition(500);
-    rightRearDrive.setTargetPosition(-500);
-    runToPosition();
-    while (isMoving());
-  
+
+    // Move forward and push the mineral
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(2500);
     leftRearDrive.setTargetPosition(2500);
@@ -381,13 +410,65 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setTargetPosition(2500);
     runToPosition();
     while (isMoving());
-    
+
+    // Move backwards from the mineral
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-2500);
+    leftRearDrive.setTargetPosition(-2500);
+    rightFrontDrive.setTargetPosition(-2500);
+    rightRearDrive.setTargetPosition(-2500);
+    runToPosition();
+    while (isMoving());
+  }
+  
+  void moveRightGold() {
+  
+    setMoveSpeed();
+
+    // shuttle off the hook
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    while (isMoving());
+
+    // Move forward
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+
+    // Align with mineral (park in front of it)
+    // shuttle right
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(1000);
     leftRearDrive.setTargetPosition(-1000);
     rightFrontDrive.setTargetPosition(-1000);
     rightRearDrive.setTargetPosition(1000);
     runToPosition();
+
+    // Move forward and push the mineral
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+
+    // Move backwards from the mineral
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-2500);
+    leftRearDrive.setTargetPosition(-2500);
+    rightFrontDrive.setTargetPosition(-2500);
+    rightRearDrive.setTargetPosition(-2500);
+    runToPosition();
+    while (isMoving());
   }
   
   //----------------------------------------------------------------------------------------------

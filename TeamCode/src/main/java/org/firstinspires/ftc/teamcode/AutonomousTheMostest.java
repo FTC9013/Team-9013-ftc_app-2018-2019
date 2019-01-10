@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -42,7 +43,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -54,16 +56,16 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@Autonomous(name = "AutonomousPrimaryVMark", group = "Linear Opmode")
+@Autonomous(name = "AutonomousTFlow", group = "Linear Opmode")
 
 //@Disabled
-public class AutonomousPrimaryVMark extends LinearOpMode {
+public class AutonomousTheMostest extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
-  private ElapsedTime runtime = new ElapsedTime();
+  private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   private static final float mmPerInch = 25.4f;
   private static final float mmFTCFieldWidth = (12 * 6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
@@ -71,7 +73,18 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
 
   OpenGLMatrix lastLocation = null;
   private boolean targetVisible = false;
-  VuforiaLocalizer vuforia;
+
+  private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+  private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+  private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+
+  private double watchdogTime = 5.0;
+  
+  private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, TARGETED, MOVED, LOST }
+  private goldPosition PositionOfTheGoldIs = goldPosition.UNKNOWN;
+
+  private VuforiaLocalizer vuforia;
+  private TFObjectDetector tfod;
   WebcamName webcamName;
 
 
@@ -81,26 +94,18 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
 
+    initVuforia();
+
+    if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+      initTfod();
+    }
+    else {
+      telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+    }
     /*
      * Retrieve the camera we are to use.
      */
     webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
-    /*
-     * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
-     * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
-     */
-    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-        "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
-    // OR...  Do Not Activate the Camera Monitor View, to save power
-    // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-    parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
-    parameters.cameraName = webcamName;
-    parameters.useExtendedTracking = false;
-
-    vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
     /**
      * Load the data sets that for the trackable objects we wish to track. */
@@ -144,10 +149,10 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Then, we translate it along the Y axis to the blue perimeter wall.
      */
-    OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
-        .translation(0, mmFTCFieldWidth, mmTargetHeight)
+    OpenGLMatrix blueRoverLocationOnField =
+      OpenGLMatrix.translation(0, mmFTCFieldWidth, mmTargetHeight)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-            0, 0));
+                                                    0, 0));
     blueRover.setLocation(blueRoverLocationOnField);
 
     /**
@@ -157,10 +162,10 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the negative Y axis to the red perimeter wall.
      */
-    OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
-        .translation(0, -mmFTCFieldWidth, mmTargetHeight)
+    OpenGLMatrix redFootprintLocationOnField =
+      OpenGLMatrix.translation(0, -mmFTCFieldWidth, mmTargetHeight)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-            0, 180));
+                                                       0, 180));
     redFootprint.setLocation(redFootprintLocationOnField);
 
     /**
@@ -170,10 +175,10 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the negative X axis to the front perimeter wall.
      */
-    OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
-        .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
+    OpenGLMatrix frontCratersLocationOnField =
+      OpenGLMatrix.translation(-mmFTCFieldWidth, 0, mmTargetHeight)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-            0, 90));
+                                                       0, 90));
     frontCraters.setLocation(frontCratersLocationOnField);
 
     /**
@@ -183,10 +188,10 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
      *   and facing inwards to the center of the field.
      * - Then, we translate it along the X axis to the back perimeter wall.
      */
-    OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
-        .translation(mmFTCFieldWidth, 0, mmTargetHeight)
+    OpenGLMatrix backSpaceLocationOnField =
+      OpenGLMatrix.translation(mmFTCFieldWidth, 0, mmTargetHeight)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90,
-            0, -90));
+                                                    0, -90));
     backSpace.setLocation(backSpaceLocationOnField);
 
     /**
@@ -217,38 +222,21 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
     final int CAMERA_VERTICAL_DISPLACEMENT = 0;   // eg: Camera is 200 mm above ground
     final int CAMERA_LEFT_DISPLACEMENT = 0;   // eg: Camera is ON the robot's center line
 
-    OpenGLMatrix cameraLocationOnRobot = OpenGLMatrix
-        .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
-            CAMERA_VERTICAL_DISPLACEMENT).multiplied(Orientation.getRotationMatrix(
-            EXTRINSIC, YZX, DEGREES, -90, 0, 0));
+    OpenGLMatrix cameraLocationOnRobot =
+      OpenGLMatrix.translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
+        CAMERA_VERTICAL_DISPLACEMENT).multiplied(Orientation.getRotationMatrix(
+        EXTRINSIC, YZX, DEGREES, -90, 0, 0));
 
     /**  Let all the trackable listeners know where the camera is.  */
     for (VuforiaTrackable trackable : allTrackables) {
       ((VuforiaTrackableDefaultListener) trackable.getListener()).setCameraLocationOnRobot(
-          parameters.cameraName, cameraLocationOnRobot);
+        webcamName, cameraLocationOnRobot);
     }
-
-
-    Queue<Leg> travelPath = new LinkedList<>();
-
-    // This is where the travel path is built:
-    // Each leg of the trip is added to the queue in this code block.
-    // Later, as the opmode runs, the legs are read out and sent to the drive base
-    // for execution.
-    //
-    // mode:     true = turn and drive, false = translate
-    // angle:    the desired angle of travel relative to the current bot position and orientation.
-    //           in DEGREES
-    // distance: the distance to travel in centimeters.
-    //
-    travelPath.add(new Leg(false, -90, 15));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
 
     // make sure the imu gyro is calibrated before continuing.
     // robot must remain motionless during calibration.
-    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated()) {
+    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
+    {
       sleep(50);
       idle();
     }
@@ -256,85 +244,163 @@ public class AutonomousPrimaryVMark extends LinearOpMode {
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
-
+  
     // start to land the bot
     landingElevator.up();
 
-    /** Start tracking the data sets we care about. */
-    targetsRoverRuckus.activate();
+    tfod.activate();
 
-    while (opModeIsActive()) {
-
-      // run until the end of the match (driver presses STOP)
-      while (opModeIsActive()) {
-        // wait for the bot to land (elevator no longer moving)
-        while (landingElevator.isMoving()) ;
-
-        // if not driving and there are still legs in the travelPath then send the next leg.
-        if (!driveChassis.isMoving() & travelPath.size() != 0) {
-          driveChassis.move(travelPath.remove());
-        }
-        // wait (spin) for leg driving to stop.
-        while (!isStopRequested() && driveChassis.isMoving()) ;
-        // put the elevator down
-        landingElevator.down();
-
-        // check all the trackable target to see which one (if any) is visible.
-        targetVisible = false;
-        for (VuforiaTrackable trackable : allTrackables) {
-          if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
-            telemetry.addData("Visible Target", trackable.getName());
-            targetVisible = true;
-
-            // getUpdatedRobotLocation() will return null if no new information is available since
-            // the last time that call was made, or if the trackable is not currently visible.
-            OpenGLMatrix robotLocationTransform = (
-                (VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-            if (robotLocationTransform != null) {
-              lastLocation = robotLocationTransform;
+    while (opModeIsActive())
+    {
+      if (PositionOfTheGoldIs == goldPosition.UNKNOWN) {
+        // getUpdatedRecognitions() will return null if no new information is available since
+        // the last time that call was made.
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+        if (updatedRecognitions != null) {
+          telemetry.addData("# Object Detected", updatedRecognitions.size());
+          if (updatedRecognitions.size() == 3) {
+            int goldMineralX = -1;
+            int silverMineral1X = -1;
+            int silverMineral2X = -1;
+            for (Recognition recognition : updatedRecognitions) {
+              if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                goldMineralX = (int) recognition.getLeft();
+              } else if (silverMineral1X == -1) {
+                silverMineral1X = (int) recognition.getLeft();
+              } else {
+                silverMineral2X = (int) recognition.getLeft();
+              }
             }
-            break;
+            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+              if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                telemetry.addData("Gold Mineral Position", "Left");
+                PositionOfTheGoldIs = goldPosition.LEFT;
+              } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                telemetry.addData("Gold Mineral Position", "Right");
+                PositionOfTheGoldIs = goldPosition.RIGHT;
+              } else {
+                telemetry.addData("Gold Mineral Position", "Center");
+                PositionOfTheGoldIs = goldPosition.CENTER;
+              }
+            }
           }
+          telemetry.update();
+          tfod.shutdown();
         }
+      }
+      else if(PositionOfTheGoldIs == goldPosition.LEFT)
+      {
+        driveChassis.moveLeftGold();
+        PositionOfTheGoldIs = goldPosition.TARGETED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.CENTER)
+      {
+        driveChassis.moveCenterGold();
+        PositionOfTheGoldIs = goldPosition.TARGETED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.RIGHT)
+      {
+        driveChassis.moveRightGold();
+        PositionOfTheGoldIs = goldPosition.TARGETED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.TARGETED)
+      {
+        landingElevator.down();
+        PositionOfTheGoldIs = goldPosition.MOVED;
+      }
 
-        // Provide feedback as to where the robot is located (if we know).
-        if (targetVisible) {
-          // express position (translation) of robot in inches.
-          VectorF translation = lastLocation.getTranslation();
-          telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-              translation.get(0) / mmPerInch, translation.get(1)
-                  / mmPerInch, translation.get(2) / mmPerInch);
+      // Watchdog timer if no minerals detected for watchdog seconds
+      if(runtime.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
+      {
+        // shuttle left to unhook even though minerals are not detected.
+        driveChassis.moveUnhook();
+        PositionOfTheGoldIs = goldPosition.LOST;
+      }
 
-          // express the rotation of the robot in degrees.
-          Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-          telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f",
-              rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-        } else {
-          telemetry.addData("Visible Target", "none");
+      //  ViewMark navigation here...
+      if(PositionOfTheGoldIs == goldPosition.MOVED || PositionOfTheGoldIs == goldPosition.LOST )
+      {
+        // initialize for trackables
+
+        // do all the trackables stuff until the end of the opmode.
+        while (opModeIsActive())
+        {
+          // check all the trackable target to see which one (if any) is visible.
+          targetVisible = false;
+
+          for (VuforiaTrackable trackable : allTrackables) {
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+              telemetry.addData("Visible Target", trackable.getName());
+              targetVisible = true;
+
+              // getUpdatedRobotLocation() will return null if no new information is available since
+              // the last time that call was made, or if the trackable is not currently visible.
+              OpenGLMatrix robotLocationTransform = (
+                  (VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+              if (robotLocationTransform != null) {
+                lastLocation = robotLocationTransform;
+              }
+              break;
+            }
+          }
+          // Provide feedback as to where the robot is located (if we know).
+          if (targetVisible) {
+            // express position (translation) of robot in inches.
+            VectorF translation = lastLocation.getTranslation();
+            telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                translation.get(0) / mmPerInch, translation.get(1)
+                                                    / mmPerInch, translation.get(2) / mmPerInch);
+
+            // express the rotation of the robot in degrees.
+            Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+            telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f",
+                rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+          } else {
+            telemetry.addData("Visible Target", "none");
+          }
+          telemetry.update();
         }
-
-        // right now this just gets the IMU telemetry, but once implemented it will be the
-        // driving interface for camera driving.
-        IMUTel = driveChassis.drive();
-
-        // Show the elapsed game time.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addLine().addData("imu status", IMUTel.imuStatus)
-            .addData("calib. status", IMUTel.calStatus);
-        telemetry.addLine().addData("Z= ", IMUTel.zTheta)
-            .addData("Y= ", IMUTel.yTheta)
-            .addData("X= ", IMUTel.xTheta);
-
-        telemetry.update();
       }
     }
   }
   /**
-   * A simple utility that extracts positioning information from a transformation matrix
-   * and formats it in a form palatable to a human being.
+   * Initialize the Vuforia localization engine.
    */
-  String format (OpenGLMatrix transformationMatrix){
-    return transformationMatrix.formatAsTransform();
+  private void initVuforia() {
+    /*
+     * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
+     * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
+     */
+    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+        "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+    parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
+    parameters.cameraName = webcamName;
+    parameters.useExtendedTracking = false;
+
+    //  Instantiate the Vuforia engine
+    vuforia = ClassFactory.getInstance().createVuforia(parameters);
   }
 
+  /**
+   * Initialize the Tensor Flow Object Detection engine.
+   */
+  private void initTfod() {
+    int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+        "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+    // init with monitor scree
+    // TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+
+    // init with no monitor screen
+    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters();
+
+    // set the minimumConfidence to a higher percentage to be more selective when identifying objects.
+    tfodParameters.minimumConfidence = 0.55;
+
+    tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+    tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+  }
 }

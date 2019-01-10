@@ -44,22 +44,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-@Autonomous(name = "AutonomousPrimaryTFlow", group = "Linear Opmode")
+@Autonomous(name = "AutonomousTFlow", group = "Linear Opmode")
 
 //@Disabled
-public class AutonomousPrimaryTFlow extends LinearOpMode {
+public class AutonomousTFlow extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
-  private ElapsedTime runtime = new ElapsedTime();
+  private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
   private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
   private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+
+  private double watchdogTime = 5.0;
   
-  private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, MOVED }
+  private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, TARGETED, MOVED, LOST }
   private goldPosition PositionOfTheGoldIs = goldPosition.UNKNOWN;
 
   private VuforiaLocalizer vuforia;
@@ -80,24 +82,6 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
       telemetry.addData("Sorry!", "This device is not compatible with TFOD");
     }
 
-
-    Queue<Leg> travelPath = new LinkedList<>();
-
-    // This is where the travel path is built:
-    // Each leg of the trip is added to the queue in this code block.
-    // Later, as the opmode runs, the legs are read out and sent to the drive base
-    // for execution.
-    //
-    // mode:     true = turn and drive, false = translate
-    // angle:    the desired angle of travel relative to the current bot position and orientation.
-    //           in DEGREES
-    // distance: the distance to travel in centimeters.
-    //
-    travelPath.add(new Leg(false, -90, 15));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
-
     // make sure the imu gyro is calibrated before continuing.
     // robot must remain motionless during calibration.
     while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
@@ -114,76 +98,78 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
     landingElevator.up();
 
     tfod.activate();
-  
-    // wait for the bot to land (elevator no longer moving)
-    while (landingElevator.isMoving()) ;
 
     while (opModeIsActive())
     {
-      // getUpdatedRecognitions() will return null if no new information is available since
-      // the last time that call was made.
-      List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-      if (updatedRecognitions != null && PositionOfTheGoldIs == goldPosition.UNKNOWN )
-      {
-        telemetry.addData("# Object Detected", updatedRecognitions.size());
-        if (updatedRecognitions.size() == 3)
-        {
-          int goldMineralX = -1;
-          int silverMineral1X = -1;
-          int silverMineral2X = -1;
-          for (Recognition recognition : updatedRecognitions)
-          {
-            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL))
-            {
-              goldMineralX = (int) recognition.getLeft();
+      if (PositionOfTheGoldIs == goldPosition.UNKNOWN) {
+        // getUpdatedRecognitions() will return null if no new information is available since
+        // the last time that call was made.
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+        if (updatedRecognitions != null) {
+          telemetry.addData("# Object Detected", updatedRecognitions.size());
+          if (updatedRecognitions.size() == 3) {
+            int goldMineralX = -1;
+            int silverMineral1X = -1;
+            int silverMineral2X = -1;
+            for (Recognition recognition : updatedRecognitions) {
+              if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                goldMineralX = (int) recognition.getLeft();
+              } else if (silverMineral1X == -1) {
+                silverMineral1X = (int) recognition.getLeft();
+              } else {
+                silverMineral2X = (int) recognition.getLeft();
+              }
             }
-            else if (silverMineral1X == -1)
-            {
-              silverMineral1X = (int) recognition.getLeft();
-            }
-            else
-            {
-              silverMineral2X = (int) recognition.getLeft();
-            }
-          }
-          if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1)
-          {
-            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X)
-            {
-              telemetry.addData("Gold Mineral Position", "Left");
-              PositionOfTheGoldIs = goldPosition.LEFT;
-            }
-            else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X)
-            {
-              telemetry.addData("Gold Mineral Position", "Right");
-              PositionOfTheGoldIs = goldPosition.RIGHT;
-            }
-            else
-            {
-              telemetry.addData("Gold Mineral Position", "Center");
-              PositionOfTheGoldIs = goldPosition.CENTER;
+            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+              if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                telemetry.addData("Gold Mineral Position", "Left");
+                PositionOfTheGoldIs = goldPosition.LEFT;
+              } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                telemetry.addData("Gold Mineral Position", "Right");
+                PositionOfTheGoldIs = goldPosition.RIGHT;
+              } else {
+                telemetry.addData("Gold Mineral Position", "Center");
+                PositionOfTheGoldIs = goldPosition.CENTER;
+              }
             }
           }
+          telemetry.update();
         }
-        telemetry.update();
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
       {
         driveChassis.moveLeftGold();
-        PositionOfTheGoldIs = goldPosition.MOVED;
+        PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
       {
         driveChassis.moveCenterGold();
-        PositionOfTheGoldIs = goldPosition.MOVED;
+        PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
         driveChassis.moveRightGold();
+        PositionOfTheGoldIs = goldPosition.TARGETED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.TARGETED)
+      {
+        landingElevator.down();
         PositionOfTheGoldIs = goldPosition.MOVED;
       }
-  
-      landingElevator.down();
+
+      // Watchdog timer if no minerals detected for watchdog seconds
+      if(runtime.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
+      {
+        // shuttle left to unhook even though minerals are not detected.
+        driveChassis.moveUnhook();
+        PositionOfTheGoldIs = goldPosition.LOST;
+      }
+
+
+
+      //  ViewMark navigation here...?
+
+
     }
     tfod.shutdown();
   }
@@ -211,6 +197,9 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
         "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
     TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+
+    // set the minimumConfidence to a higher percentage to be more selective when identifying objects.
+    tfodParameters.minimumConfidence = 0.55;
 
     tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
     tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
