@@ -47,8 +47,7 @@ public class AutonomousPrimary extends LinearOpMode {
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
   private ElapsedTime runtime = new ElapsedTime();
-
-
+  
   @Override
   public void runOpMode() {
 

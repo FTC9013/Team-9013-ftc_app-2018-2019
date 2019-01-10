@@ -58,6 +58,9 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
   private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
   private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
   private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+  
+  private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, MOVED }
+  private goldPosition PositionOfTheGoldIs = goldPosition.UNKNOWN;
 
   private VuforiaLocalizer vuforia;
   private TFObjectDetector tfod;
@@ -106,15 +109,21 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
+  
+    // start to land the bot
+    landingElevator.up();
 
     tfod.activate();
+  
+    // wait for the bot to land (elevator no longer moving)
+    while (landingElevator.isMoving()) ;
 
     while (opModeIsActive())
     {
       // getUpdatedRecognitions() will return null if no new information is available since
       // the last time that call was made.
       List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-      if (updatedRecognitions != null)
+      if (updatedRecognitions != null && PositionOfTheGoldIs == goldPosition.UNKNOWN )
       {
         telemetry.addData("# Object Detected", updatedRecognitions.size());
         if (updatedRecognitions.size() == 3)
@@ -142,21 +151,41 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
             if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X)
             {
               telemetry.addData("Gold Mineral Position", "Left");
+              PositionOfTheGoldIs = goldPosition.LEFT;
             }
             else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X)
             {
               telemetry.addData("Gold Mineral Position", "Right");
+              PositionOfTheGoldIs = goldPosition.RIGHT;
             }
             else
             {
               telemetry.addData("Gold Mineral Position", "Center");
+              PositionOfTheGoldIs = goldPosition.CENTER;
             }
           }
         }
         telemetry.update();
       }
+      else if(PositionOfTheGoldIs == goldPosition.LEFT)
+      {
+        driveChassis.moveLeftGold();
+        PositionOfTheGoldIs = goldPosition.MOVED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.CENTER)
+      {
+        driveChassis.moveCenterGold();
+        PositionOfTheGoldIs = goldPosition.MOVED;
+      }
+      else if(PositionOfTheGoldIs == goldPosition.RIGHT)
+      {
+        driveChassis.moveRightGold();
+        PositionOfTheGoldIs = goldPosition.MOVED;
+      }
+  
+      landingElevator.down();
     }
-      tfod.shutdown();
+    tfod.shutdown();
   }
   /**
    * Initialize the Vuforia localization engine.
@@ -172,8 +201,6 @@ public class AutonomousPrimaryTFlow extends LinearOpMode {
 
     //  Instantiate the Vuforia engine
     vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-    // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
   }
 
   /**

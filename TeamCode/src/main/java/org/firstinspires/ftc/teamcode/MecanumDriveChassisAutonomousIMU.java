@@ -290,14 +290,6 @@ public class MecanumDriveChassisAutonomousIMU
 
     // end of temporary kludge ******************
 
-  
-  
-  
-  
-  
-  
-  
-  
     // reset start angle from gyro
     // startAngle = angles.firstAngle;  // zero reference for the leg
     // should be piecewise...
@@ -311,7 +303,93 @@ public class MecanumDriveChassisAutonomousIMU
       translateDistance = leg.distance;
     }
   }
-
+  
+  void moveLeftGold() {
+  
+    setMoveSpeed();
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    while (isMoving());
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    
+  }
+  
+  void moveCenterGold() {
+  
+    setMoveSpeed();
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    while (isMoving());
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(500);
+    leftRearDrive.setTargetPosition(-500);
+    rightFrontDrive.setTargetPosition(-500);
+    rightRearDrive.setTargetPosition(500);
+    runToPosition();
+  
+  }
+  
+  void moveRightGold() {
+  
+    setMoveSpeed();
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(-500);
+    leftRearDrive.setTargetPosition(500);
+    rightFrontDrive.setTargetPosition(500);
+    rightRearDrive.setTargetPosition(-500);
+    runToPosition();
+    while (isMoving());
+  
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(2500);
+    leftRearDrive.setTargetPosition(2500);
+    rightFrontDrive.setTargetPosition(2500);
+    rightRearDrive.setTargetPosition(2500);
+    runToPosition();
+    while (isMoving());
+    
+    stopAndResetEncoders();
+    leftFrontDrive.setTargetPosition(1000);
+    leftRearDrive.setTargetPosition(-1000);
+    rightFrontDrive.setTargetPosition(-1000);
+    rightRearDrive.setTargetPosition(1000);
+    runToPosition();
+  }
+  
   //----------------------------------------------------------------------------------------------
   // Telemetry Configuration
   //----------------------------------------------------------------------------------------------
@@ -328,5 +406,28 @@ public class MecanumDriveChassisAutonomousIMU
 //    IMUTel.xTheta = formatAngle(angles.angleUnit, angles.thirdAngle);
   
   }
+  
+  void setMoveSpeed() {
+    rightFrontDrive.setPower(turnSpeed);
+    leftFrontDrive.setPower(turnSpeed);
+    rightRearDrive.setPower(turnSpeed);
+    leftRearDrive.setPower(turnSpeed);
+  }
+  
+  void stopAndResetEncoders(){
+    leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+  }
+  
+  void runToPosition() {
+    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    leftRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rightRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+  }
+  
+  
+  
 }
-

@@ -19,8 +19,9 @@ public class Elevator
 
   // +/- counts to say the motor is stopped a the target position.
   static final int closeEnough = 10;
-
-
+  
+  //Reset lowering of Elevator.
+  static final int resetDown = -1150;
   // comment.....
   
   Elevator(HardwareMap hardwareMap)
@@ -59,6 +60,9 @@ public class Elevator
       return abs( elevatorMotor.getCurrentPosition()
                  - elevatorMotor.getTargetPosition()) > closeEnough;
     }
-
+  
+    void resetDown()   {
+      elevatorMotor.setTargetPosition(resetDown);
+    }
 
 }
