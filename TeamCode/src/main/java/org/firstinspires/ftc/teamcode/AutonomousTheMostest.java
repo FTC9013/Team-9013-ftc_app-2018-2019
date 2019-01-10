@@ -56,7 +56,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@Autonomous(name = "AutonomousTFlow", group = "Linear Opmode")
+@Autonomous(name = "AutonomousTheMostest", group = "Linear Opmode")
 
 //@Disabled
 public class AutonomousTheMostest extends LinearOpMode {
@@ -93,7 +93,8 @@ public class AutonomousTheMostest extends LinearOpMode {
 
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
-
+    webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+    
     initVuforia();
 
     if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -105,7 +106,7 @@ public class AutonomousTheMostest extends LinearOpMode {
     /*
      * Retrieve the camera we are to use.
      */
-    webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
 
     /**
      * Load the data sets that for the trackable objects we wish to track. */
@@ -285,7 +286,7 @@ public class AutonomousTheMostest extends LinearOpMode {
             }
           }
           telemetry.update();
-          tfod.shutdown();
+//          tfod.shutdown();
         }
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
