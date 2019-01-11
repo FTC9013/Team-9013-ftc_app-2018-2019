@@ -74,13 +74,40 @@ public class AutonomousTFlow extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
 
-    initVuforia();
+    // build all the drive plans for drive by distance (to move the gold mineral)
+    //
+    // Each leg of the trip is added to the queue in this code block.
+    // As the opmode runs, the queue sent to the drive base for execution.
+    //
+    // mode:     {FORWARD, BACKWARDS, LEFT, RIGHT, TURN_DRIVE}
+    // angle:    the desired angle of travel relative to the current bot position and orientation.
+    //           in DEGREES
+    // distance: the distance to travel in inches
 
-    if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
-      initTfod();
-    } else {
-      telemetry.addData("Sorry!", "This device is not compatible with TFOD");
-    }
+    Queue<Leg> leftPath = new LinkedList<>();
+    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 12));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+
+    Queue<Leg> centerPath = new LinkedList<>();
+    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
+    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+
+    Queue<Leg> rightPath = new LinkedList<>();
+    rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 17));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+
+    Queue<Leg> lostPath = new LinkedList<>();
+    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+
+    initVuforia();
+    initTfod();
 
     // make sure the imu gyro is calibrated before continuing.
     // robot must remain motionless during calibration.
@@ -138,17 +165,17 @@ public class AutonomousTFlow extends LinearOpMode {
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
       {
-        driveChassis.moveLeftGold();
+        driveChassis.move(leftPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
       {
-        driveChassis.moveCenterGold();
+        driveChassis.move(centerPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
-        driveChassis.moveRightGold();
+        driveChassis.move(rightPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)
@@ -161,13 +188,13 @@ public class AutonomousTFlow extends LinearOpMode {
       if(runtime.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
       {
         // shuttle left to unhook even though minerals are not detected.
-        driveChassis.moveUnhook();
+        driveChassis.move(lostPath);
         PositionOfTheGoldIs = goldPosition.LOST;
+        landingElevator.down();
       }
 
 
-
-      //  ViewMark navigation here...?
+      //  Maybe do something else here...?
 
 
     }

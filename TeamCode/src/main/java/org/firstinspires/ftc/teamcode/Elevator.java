@@ -13,7 +13,7 @@ public class Elevator
   static final double elevatorStop = 0;
 
   //Maximum height of Elevator.
-  static final int topFloor = 1175;
+  static final int topFloor = 1150;
   //Minimum height of Elevator.
   static final int lobbyFloor = 0;
 
@@ -58,8 +58,9 @@ public class Elevator
     {
       // send the elevator down (raise the bot)
       elevatorMotor.setTargetPosition(lobbyFloor);
-      // wait for the elevator to get to the target
-      while( isMoving());
+
+      // allow down while moving to save time
+      // while( isMoving());
     }
 
     boolean isMoving()   {

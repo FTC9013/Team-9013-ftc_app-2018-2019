@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Queue;
 
 public class MecanumDriveChassisAutonomousIMU
 {
@@ -77,11 +78,6 @@ public class MecanumDriveChassisAutonomousIMU
     rightFrontDrive = hardwareMap.get(DcMotor.class, "rFront"); //hub 3 port 1
     rightRearDrive = hardwareMap.get(DcMotor.class, "rRear"); //hub 3 port 3
 
-    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
     leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     leftRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -101,7 +97,7 @@ public class MecanumDriveChassisAutonomousIMU
     thetaD = 0;
     vTheta = 0;
 
-    // Set all the motor speeds.
+    // Set all the motor speeds to 0.
     rightFrontDriveSpeed = 0;
     leftFrontDriveSpeed = 0;
     rightRearDriveSpeed = 0;
@@ -112,10 +108,7 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setPower(rightRearDriveSpeed);
     leftRearDrive.setPower(leftRearDriveSpeed);
 
-    
-    // start of temporary kludge ******************
-    // allows quick shuttle by encoder after landing the bot.
-  
+    // reset encoders and target positions to 0
     leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -125,15 +118,12 @@ public class MecanumDriveChassisAutonomousIMU
     leftRearDrive.setTargetPosition(0);
     rightFrontDrive.setTargetPosition(0);
     rightRearDrive.setTargetPosition(0);
-    
+
     leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-    // end of temporary kludge ******************
-    
-    
     // Get and initialize the IMU. (we will use the imu on hub id = 3)
     imu = hardwareMap.get(BNO055IMU.class, "imu1");
 
@@ -226,29 +216,11 @@ public class MecanumDriveChassisAutonomousIMU
   }
 
   /**
-   * this is called every pass of the opmode while() loop to update power to the wheels
-   * and return the current telemetry.
-   * @return
+   * returns IMU telemetry
    */
-  IMUTelemetry drive () {
+  IMUTelemetry getIMUTel () {
   
-  angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-  
-  if(driveMode) { // turn and drive
-
-    
-  
-  
-  }
-  else {  // translating
-  
-  }
-    
-    // Magic Goes Here!
-  
-    
-    // Math out what to send to the motors and send it.
-    //PowerToWheels();
+    angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     composeTelemetry();
     return IMUTel;
   }
@@ -263,52 +235,45 @@ public class MecanumDriveChassisAutonomousIMU
            || leftRearDrive.isBusy();
   }
   
-  
-  /**
-   * loads a movement leg into the target variables.
-   */
-  void move( Leg leg ) {
 
+  // execute a path (list of drive legs)
+  void move(Queue<Leg> path ) {
+    Leg currentLeg;
+    // as long as there are legs to drive...
+    while(path.size() !=0 ){
+      currentLeg = path.remove();
+      // speed is passed in as a % from 1 to 100.  motor speed control range is 0-1 with
+      // 1 being 100%
+      setMoveSpeed(currentLeg.speed/100);
 
-    // start of temporary kludge ******************
-    // allows quick shuttle by encoder after landing the bot.
-  
-  
-    rightFrontDrive.setPower(turnSpeed);
-    leftFrontDrive.setPower(turnSpeed);
-    rightRearDrive.setPower(turnSpeed);
-    leftRearDrive.setPower(turnSpeed);
-    
-    leftFrontDrive.setTargetPosition(-500);
-    leftRearDrive.setTargetPosition(500);
-    rightFrontDrive.setTargetPosition(500);
-    rightRearDrive.setTargetPosition(-500);
-  
-    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    leftRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    rightRearDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      switch (currentLeg.mode) {
+        case FORWARD:
+          driveForward(currentLeg.distance);
+          break;
 
+        case BACKWARDS:
+          driveBackwards(currentLeg.distance);
+          break;
 
+        case LEFT:
+          strafeLeft(currentLeg.distance);
+          break;
 
-    // end of temporary kludge ******************
+        case RIGHT:
+          strafeRight(currentLeg.distance);
+          break;
 
-    // reset start angle from gyro
-    // startAngle = angles.firstAngle;  // zero reference for the leg
-    // should be piecewise...
-    
-    if(driveMode) {    // is it turn and drive (true)?
-      rotateToAngle = leg.angle;
-      driveDistance = leg.distance;
+        case TURN_DRIVE:
+
+          break;
+      }
     }
-    else {    // is translate
-      translateAngle = leg.angle;
-      translateDistance = leg.distance;
-    }
+    // set speed back to 0 at the end of the drive
+    setMoveSpeed(0);
+
   }
 
-  
-  void driveForward(float inches){
+  void driveForward(double inches){
     // Move forward
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition((int)(inches * countsPerDriveInch));
@@ -316,67 +281,43 @@ public class MecanumDriveChassisAutonomousIMU
     rightFrontDrive.setTargetPosition((int)(inches * countsPerDriveInch));
     rightRearDrive.setTargetPosition((int)(inches * countsPerDriveInch));
     runToPosition();
+    // wait for motors to stop
     while (isMoving());
   }
   
-  void driveBackwards(float inches){
+  void driveBackwards(double inches){
     stopAndResetEncoders();
     leftFrontDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
     leftRearDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
     rightFrontDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
     rightRearDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
     runToPosition();
+    // wait for motors to stop
     while (isMoving());
   }
   
-  void strafeLeft(float inches){
+  void strafeLeft(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
-    leftRearDrive.setTargetPosition((int)(inches * countsPerDriveInch));
-    rightFrontDrive.setTargetPosition((int)(inches * countsPerDriveInch));
-    rightRearDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
+    leftFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    leftRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    rightFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    rightRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
     runToPosition();
+    // wait for motors to stop
     while (isMoving());
   }
   
-  void strafeRight(float inches){
+  void strafeRight(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition((int)(inches * countsPerDriveInch));
-    leftRearDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
-    rightFrontDrive.setTargetPosition(-(int)(inches * countsPerDriveInch));
-    rightRearDrive.setTargetPosition((int)(inches * countsPerDriveInch));
+    leftFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    leftRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    rightFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    rightRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
     runToPosition();
+    // wait for motors to stop
     while (isMoving());
   }
-  void moveUnhook() {
 
-    setMoveSpeed();
-
-    // shuttle off the hook
-    stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(-500);
-    leftRearDrive.setTargetPosition(500);
-    rightFrontDrive.setTargetPosition(500);
-    rightRearDrive.setTargetPosition(-500);
-    runToPosition();
-    while (isMoving()) ;
-  }
-  
-  void moveLeftGold() {
-  
-  
-  }
-  
-  void moveCenterGold() {
-  
-  
-  }
-  
-  void moveRightGold() {
-  
-  
-  }
-  
   //----------------------------------------------------------------------------------------------
   // Telemetry Configuration
   //----------------------------------------------------------------------------------------------
@@ -386,19 +327,14 @@ public class MecanumDriveChassisAutonomousIMU
     IMUTel.imuStatus = imu.getSystemStatus().toShortString();
     IMUTel.calStatus = imu.getCalibrationStatus().toString();
     IMUTel.zTheta = String.format(Locale.getDefault(), "%.2f", angles.firstAngle);
-    IMUTel.yTheta = "!";
-    IMUTel.xTheta = "!";
-//    IMUTel.zTheta = formatAngle(angles.angleUnit, angles.firstAngle);
-//    IMUTel.yTheta = formatAngle(angles.angleUnit, angles.secondAngle);
-//    IMUTel.xTheta = formatAngle(angles.angleUnit, angles.thirdAngle);
-  
+
   }
   
-  void setMoveSpeed() {
-    rightFrontDrive.setPower(turnSpeed);
-    leftFrontDrive.setPower(turnSpeed);
-    rightRearDrive.setPower(turnSpeed);
-    leftRearDrive.setPower(turnSpeed);
+  void setMoveSpeed(double speed) {
+    rightFrontDrive.setPower(speed);
+    leftFrontDrive.setPower(speed);
+    rightRearDrive.setPower(speed);
+    leftRearDrive.setPower(speed);
   }
   
   void stopAndResetEncoders(){

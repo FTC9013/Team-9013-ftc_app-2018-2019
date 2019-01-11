@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -47,24 +48,20 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@Autonomous(name = "AutonomousTheMostest", group = "Linear Opmode")
+@Autonomous(name = "Test_TheMostest", group = "Linear Opmode")
 
-//@Disabled
-public class AutonomousTheMostest extends LinearOpMode {
+@Disabled
+public class Test_TheMostest extends LinearOpMode {
 
   // Declare OpMode members.
-  private MecanumDriveChassisAutonomousIMU driveChassis;
-  private IMUTelemetry IMUTel;
-  private Elevator landingElevator;
+
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   private static final float mmPerInch = 25.4f;
@@ -91,45 +88,20 @@ public class AutonomousTheMostest extends LinearOpMode {
   @Override
   public void runOpMode() {
 
-    driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
-    landingElevator = new Elevator(hardwareMap);
-    webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
-
-    // build all the drive plans for drive by distance (to move the gold mineral)
-    //
-    // Each leg of the trip is added to the queue in this code block.
-    // As the opmode runs, the queue sent to the drive base for execution.
-    //
-    // mode:     {FORWARD, BACKWARDS, LEFT, RIGHT, TURN_DRIVE}
-    // speed:    the drive speed from 0-100%
-    // angle:    the desired angle of travel relative to the current bot position and orientation.
-    //           in DEGREES
-    // distance: the distance to travel in inches
-
-    Queue<Leg> leftPath = new LinkedList<>();
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 12));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
-
-    Queue<Leg> centerPath = new LinkedList<>();
-    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
-
-    Queue<Leg> rightPath = new LinkedList<>();
-    rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 17));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
-
-    Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
-    lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
-
+//    webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+    
     initVuforia();
-    initTfod();
+
+    if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+      initTfod();
+    }
+    else {
+      telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+    }
+    /*
+     * Retrieve the camera we are to use.
+     */
+
 
     /**
      * Load the data sets that for the trackable objects we wish to track. */
@@ -257,21 +229,10 @@ public class AutonomousTheMostest extends LinearOpMode {
         webcamName, cameraLocationOnRobot);
     }
 
-    // make sure the imu gyro is calibrated before continuing.
-    // robot must remain motionless during calibration.
-    while (!isStopRequested() && !driveChassis.IMU_IsCalibrated())
-    {
-      sleep(50);
-      idle();
-    }
-
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
   
-    // start to land the bot
-    landingElevator.up();
-
     tfod.activate();
 
     while (opModeIsActive())
@@ -314,22 +275,22 @@ public class AutonomousTheMostest extends LinearOpMode {
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
       {
-        driveChassis.move(leftPath);
+        //driveChassis.moveLeftGold();
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
       {
-        driveChassis.move(centerPath);
+        //driveChassis.moveCenterGold();
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
-        driveChassis.move(rightPath);
+        //driveChassis.moveRightGold();
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)
       {
-        landingElevator.down();
+        //landingElevator.down();
         PositionOfTheGoldIs = goldPosition.MOVED;
       }
 
@@ -337,13 +298,15 @@ public class AutonomousTheMostest extends LinearOpMode {
       if(runtime.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
       {
         // shuttle left to unhook even though minerals are not detected.
-        driveChassis.move(lostPath);
+        //driveChassis.moveUnhook();
         PositionOfTheGoldIs = goldPosition.LOST;
       }
 
       //  ViewMark navigation here...
       if(PositionOfTheGoldIs == goldPosition.MOVED || PositionOfTheGoldIs == goldPosition.LOST )
       {
+        // initialize for trackables
+
         // Start tracking the VuMarks
         targetsRoverRuckus.activate();
 
@@ -383,12 +346,6 @@ public class AutonomousTheMostest extends LinearOpMode {
           } else {
             telemetry.addData("Visible Target", "none");
           }
-
-          IMUTel = driveChassis.getIMUTel();
-          // Show the elapsed game time.
-          telemetry.addLine().addData("imu status", IMUTel.imuStatus)
-              .addData("IMUcalib. status", IMUTel.calStatus);
-          telemetry.addLine().addData("IMUheading= ", IMUTel.zTheta);
           telemetry.update();
         }
       }
@@ -408,7 +365,8 @@ public class AutonomousTheMostest extends LinearOpMode {
     VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
     parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
-    parameters.cameraName = webcamName;
+    //parameters.cameraName = webcamName;
+    parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
     parameters.useExtendedTracking = false;
 
     //  Instantiate the Vuforia engine

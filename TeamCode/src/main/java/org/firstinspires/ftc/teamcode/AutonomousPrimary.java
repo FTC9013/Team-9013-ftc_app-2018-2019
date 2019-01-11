@@ -34,12 +34,13 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "AutonomousPrimary", group = "Linear Opmode")
 
-//@Disabled
+@Disabled
 public class AutonomousPrimary extends LinearOpMode {
 
   // Declare OpMode members.
@@ -54,22 +55,9 @@ public class AutonomousPrimary extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
 
-    Queue<Leg> travelPath = new LinkedList<>();
-
-    // This is where the travel path is built:
-    // Each leg of the trip is added to the queue in this code block.
-    // Later, as the opmode runs, the legs are read out and sent to the drive base
-    // for execution.
-    //
-    // mode:     true = turn and drive, false = translate
-    // angle:    the desired angle of travel relative to the current bot position and orientation.
-    //           in DEGREES
-    // distance: the distance to travel in centimeters.
-    //
-    travelPath.add(new Leg(false, -90, 15));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
-    //travelPath.add(new Leg(true, 1, 1));
+    Queue<Leg> lostPath = new LinkedList<>();
+    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     // make sure the imu gyro is calibrated before continuing.
     // robot must remain motionless during calibration.
@@ -89,26 +77,21 @@ public class AutonomousPrimary extends LinearOpMode {
     // run until the end of the match (driver presses STOP)
     while (opModeIsActive()) {
 
-      // if not driving and there are still legs in the travelPath then send the next leg.
-      if (!driveChassis.isMoving() & travelPath.size() != 0) {
-        driveChassis.move(travelPath.remove());
-      }
-
-      while (!isStopRequested() && driveChassis.isMoving());
+      driveChassis.move(lostPath);
 
       // put the elevator back down after the autonomous mode.
       landingElevator.down();
 
-      IMUTel = driveChassis.drive();
+      while (opModeIsActive()) {
+        IMUTel = driveChassis.getIMUTel();
 
-      // Show the elapsed game time.
-      telemetry.addData("Status", "Run Time: " + runtime.toString());
-      telemetry.addLine().addData("imu status", IMUTel.imuStatus)
-          .addData("calib. status", IMUTel.calStatus);
-      telemetry.addLine().addData("Z= ", IMUTel.zTheta)
-          .addData("Y= ", IMUTel.yTheta)
-          .addData("X= ", IMUTel.xTheta);
-      telemetry.update();
+        // Show the elapsed game time.
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addLine().addData("imu status", IMUTel.imuStatus)
+            .addData("calib. status", IMUTel.calStatus);
+        telemetry.addLine().addData("heading= ", IMUTel.zTheta);
+        telemetry.update();
+      }
     }
   }
 }

@@ -5,7 +5,4 @@ public class IMUTelemetry
   String imuStatus;
   String calStatus;
   String zTheta;
-  String yTheta;
-  String xTheta;
-  
 }
