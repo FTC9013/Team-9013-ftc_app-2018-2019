@@ -65,7 +65,10 @@ public class AutonomousTheMostest extends LinearOpMode {
   private MecanumDriveChassisAutonomousIMU driveChassis;
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
+  
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  private ElapsedTime watchdog = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  
 
   private static final float mmPerInch = 25.4f;
   private static final float mmFTCFieldWidth = (12 * 6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
@@ -78,7 +81,7 @@ public class AutonomousTheMostest extends LinearOpMode {
   private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
   private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
 
-  private double watchdogTime = 5.0;
+  private double watchdogTime = 10.0;
   
   private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, TARGETED, MOVED, LOST }
   private goldPosition PositionOfTheGoldIs = goldPosition.UNKNOWN;
@@ -107,28 +110,29 @@ public class AutonomousTheMostest extends LinearOpMode {
     // distance: the distance to travel in inches
 
     Queue<Leg> leftPath = new LinkedList<>();
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 12));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 13));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> centerPath = new LinkedList<>();
-    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    centerPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> rightPath = new LinkedList<>();
-    rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 17));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 20));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 2.5));
+    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     initVuforia();
+    
     initTfod();
 
     /**
@@ -268,12 +272,15 @@ public class AutonomousTheMostest extends LinearOpMode {
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
-  
+
     // start to land the bot
     landingElevator.up();
 
+    driveChassis.centerBot();
+  
     tfod.activate();
-
+    watchdog.reset();
+    
     while (opModeIsActive())
     {
       if (PositionOfTheGoldIs == goldPosition.UNKNOWN) {
@@ -309,7 +316,6 @@ public class AutonomousTheMostest extends LinearOpMode {
             }
           }
           telemetry.update();
-          tfod.shutdown();
         }
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
@@ -334,16 +340,18 @@ public class AutonomousTheMostest extends LinearOpMode {
       }
 
       // Watchdog timer if no minerals detected for watchdog seconds
-      if(runtime.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
+      if(watchdog.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
       {
         // shuttle left to unhook even though minerals are not detected.
         driveChassis.move(lostPath);
+        landingElevator.down();
         PositionOfTheGoldIs = goldPosition.LOST;
       }
 
       //  ViewMark navigation here...
       if(PositionOfTheGoldIs == goldPosition.MOVED || PositionOfTheGoldIs == goldPosition.LOST )
       {
+        tfod.shutdown();
         // Start tracking the VuMarks
         targetsRoverRuckus.activate();
 
@@ -383,13 +391,6 @@ public class AutonomousTheMostest extends LinearOpMode {
           } else {
             telemetry.addData("Visible Target", "none");
           }
-
-          IMUTel = driveChassis.getIMUTel();
-          // Show the elapsed game time.
-          telemetry.addLine().addData("imu status", IMUTel.imuStatus)
-              .addData("IMUcalib. status", IMUTel.calStatus);
-          telemetry.addLine().addData("IMUheading= ", IMUTel.zTheta);
-          telemetry.update();
         }
       }
     }
@@ -405,8 +406,10 @@ public class AutonomousTheMostest extends LinearOpMode {
     int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
         "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
-    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
+//    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+  
+  
     parameters.vuforiaLicenseKey = "AQRzHg//////AAABmXMVtox6l0XGn+SvzgNNpWFjA9hRfHwyWN6qA9I+JGvGwQmXG4N89mTxwKDB6dq8QOvsj7xtdR/8l4x+//QG8Ne0A7zdNk9spYVAJqNKWteFOkPYOtlsaVUF0zCQjIRkcMx+iYnNfOIFczN6a41rV3M4cM59tnp59ia8EwGB+P3Sim3UnouhbEfQmy1taJKHSpqRQpeqXJyEvEldrGcJC/UkNvAA42lzNIjusSN70FzpfZUwyf9CSL6TymIfuca35I75wEd9fypv0FhaqMzYM9JqqFGUEULdbruotFc8Ps2KDNrjZO1E+bFyxxlWyfKkS0DwuCYPSmG4+yo2FA7ZVwdF3gEgAx9DjtpD9lWNbg9k";
     parameters.cameraName = webcamName;
     parameters.useExtendedTracking = false;
@@ -423,13 +426,13 @@ public class AutonomousTheMostest extends LinearOpMode {
         "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
     // init with monitor scree
-    // TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
 
     // init with no monitor screen
-    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters();
+ //   TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters();
 
     // set the minimumConfidence to a higher percentage to be more selective when identifying objects.
-    tfodParameters.minimumConfidence = 0.55;
+//    tfodParameters.minimumConfidence = 0.45;
 
     tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
     tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);

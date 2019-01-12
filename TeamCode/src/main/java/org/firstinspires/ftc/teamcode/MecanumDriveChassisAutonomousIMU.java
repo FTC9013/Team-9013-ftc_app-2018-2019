@@ -214,6 +214,15 @@ public class MecanumDriveChassisAutonomousIMU
     rightRearDrive.setPower(speeds.get(2));
     leftRearDrive.setPower(speeds.get(3));
   }
+  
+  /**
+   * centers the robot to the current gyro zero
+   */
+  void centerBot()
+  {
+  
+  
+  }
 
   /**
    * returns IMU telemetry
@@ -298,10 +307,10 @@ public class MecanumDriveChassisAutonomousIMU
   
   void strafeLeft(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
-    leftRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
-    rightFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
-    rightRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    leftFrontDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
+    leftRearDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
+    rightFrontDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
+    rightRearDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
     runToPosition();
     // wait for motors to stop
     while (isMoving());
@@ -309,10 +318,10 @@ public class MecanumDriveChassisAutonomousIMU
   
   void strafeRight(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
-    leftRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
-    rightFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
-    rightRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    leftFrontDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
+    leftRearDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
+    rightFrontDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
+    rightRearDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
     runToPosition();
     // wait for motors to stop
     while (isMoving());

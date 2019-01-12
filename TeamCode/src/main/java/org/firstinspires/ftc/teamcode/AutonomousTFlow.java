@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -46,7 +47,7 @@ import java.util.Queue;
 
 @Autonomous(name = "AutonomousTFlow", group = "Linear Opmode")
 
-//@Disabled
+@Disabled
 public class AutonomousTFlow extends LinearOpMode {
 
   // Declare OpMode members.
@@ -226,7 +227,7 @@ public class AutonomousTFlow extends LinearOpMode {
     TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
 
     // set the minimumConfidence to a higher percentage to be more selective when identifying objects.
-    tfodParameters.minimumConfidence = 0.55;
+//    tfodParameters.minimumConfidence = 0.55;
 
     tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
     tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);

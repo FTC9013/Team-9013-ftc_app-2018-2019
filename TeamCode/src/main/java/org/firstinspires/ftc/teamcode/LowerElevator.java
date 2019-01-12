@@ -63,9 +63,16 @@ public class LowerElevator extends LinearOpMode {
     // Wait for the game to start (driver presses PLAY)
 
     waitForStart();
-    landingElevator.resetDown();
-    while (opModeIsActive()){
-      telemetry.update();
+    while (opModeIsActive())
+    {
+      if (gamepad1.x)
+      {
+        landingElevator.resetDown();
+      }
+      if (gamepad1.y)
+      {
+        landingElevator.resetUp();
+      }
     }
   }
 }
