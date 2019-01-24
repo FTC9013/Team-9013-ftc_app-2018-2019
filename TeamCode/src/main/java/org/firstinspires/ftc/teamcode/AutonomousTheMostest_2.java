@@ -110,7 +110,7 @@ public class AutonomousTheMostest_2 extends LinearOpMode {
     // distance: the distance to travel in inches
 
     Queue<Leg> littleBump = new LinkedList<>();
-    littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 0.5));
+    littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 0.75));
 
     Queue<Leg> leftPath = new LinkedList<>();
     leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
