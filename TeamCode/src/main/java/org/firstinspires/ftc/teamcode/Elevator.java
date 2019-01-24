@@ -47,51 +47,45 @@ public class Elevator
     elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
-    void teleUp()
+  void teleUp()
   {
-    ElapsedTime droptime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-    droptime.reset();
     // send the elevator up
     elevatorMotor.setTargetPosition(topFloor );
   }
-    void up()
-    {
-      ElapsedTime droptime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-      droptime.reset();
-      // send the elevator up (land the bot)
-      // pause half way to center the bot
-      elevatorMotor.setTargetPosition((int)(topFloor / 2.2));
-      // lower the rest of the way
-      while(droptime.time() < 7 );
-        elevatorMotor.setTargetPosition(topFloor );
-      // wait for the elevator to get to the target
-      while( isMoving());
-    }
 
-    void down()
-    {
-      // send the elevator down (raise the bot)
-      elevatorMotor.setTargetPosition(lobbyFloor);
+  void up()
+  {
+    // send the elevator up (land the bot)
+    elevatorMotor.setTargetPosition(topFloor );
+    // wait for the elevator to get to the target
+    while( isMoving());
+  }
 
-      // allow down while moving to save time
-      // while( isMoving());
-    }
+  void down()
+  {
+    // send the elevator down (raise the bot)
+    elevatorMotor.setTargetPosition(lobbyFloor);
 
-    boolean isMoving()   {
-      // is the current position is within 'closeEnough' counts of the set point position
-      // could use the motor method isBusy but not sure how it works... may be too sensitive.
-      return abs( elevatorMotor.getCurrentPosition()
-                 - elevatorMotor.getTargetPosition()) > closeEnough;
-    }
+    // allow down while moving to save time
+    // while( isMoving());
+  }
 
-    // used by the LowerElevator Opmode to move the elevator down if
-    // it is left up for some reason
-    void resetDown()
-    {
-      elevatorMotor.setTargetPosition(elevatorMotor.getCurrentPosition() -  resetStep);
-    }
-    void resetUp()
-    {
-      elevatorMotor.setTargetPosition(elevatorMotor.getCurrentPosition() +  resetStep);
-    }
+  boolean isMoving()
+  {
+    // is the current position is within 'closeEnough' counts of the set point position
+    // could use the motor method isBusy but not sure how it works... may be too sensitive.
+    return abs( elevatorMotor.getCurrentPosition()
+               - elevatorMotor.getTargetPosition()) > closeEnough;
+  }
+
+  // used by the LowerElevator Opmode to move the elevator down if
+  // it is left up for some reason
+  void resetDown()
+  {
+    elevatorMotor.setTargetPosition(elevatorMotor.getCurrentPosition() -  resetStep);
+  }
+  void resetUp()
+  {
+    elevatorMotor.setTargetPosition(elevatorMotor.getCurrentPosition() +  resetStep);
+  }
 }
