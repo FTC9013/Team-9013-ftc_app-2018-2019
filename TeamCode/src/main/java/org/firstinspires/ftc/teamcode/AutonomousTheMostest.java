@@ -113,22 +113,22 @@ public class AutonomousTheMostest extends LinearOpMode {
     leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
 
     Queue<Leg> centerPath = new LinkedList<>();
     centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     centerPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
 
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 17.5)); //20
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
 
     Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
+    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 4.0)); //3.5
     lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     initVuforia();
