@@ -17,17 +17,15 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Queue;
 
-public class MecanumDriveChassisAutonomousIMU
+class MecanumDriveChassisAutonomousIMU
 {
-  private DcMotor leftFrontDrive = null;
-  private DcMotor leftRearDrive = null;
-  private DcMotor rightFrontDrive = null;
-  private DcMotor rightRearDrive = null;
-  private BNO055IMU imu = null;
+  private DcMotor leftFrontDrive;
+  private DcMotor leftRearDrive;
+  private DcMotor rightFrontDrive;
+  private DcMotor rightRearDrive;
+  private BNO055IMU imu;
 
-  // State used for updating telemetry
-  Orientation angles;
-  Acceleration gravity;
+  private Orientation angles; // stores the current orientation of the bot from the IMU
 
   private static double leftFrontDriveSpeed;
   private static double leftRearDriveSpeed;
@@ -42,7 +40,7 @@ public class MecanumDriveChassisAutonomousIMU
   private static boolean driveMode;  // leg drive mode
   private static boolean moving;
   
-  public static IMUTelemetry IMUTel;
+  private static IMUTelemetry IMUTel;
   
   
   // Robot speed [-1, 1].  (speed in any direction that is not rotational)
@@ -62,9 +60,10 @@ public class MecanumDriveChassisAutonomousIMU
   // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
   private final double speedScale = 0.8;
   
-  // speed for a turn
-  private final double turnSpeed = 0.3;
-  
+  // speed for am IMU turn
+  private final double MaxTurnSpeed = 0.3;
+  private final int countsPerTurnDegree = 10;
+  private final double angleError = 1;          // turn angle error cutoff to stop turning.
   private final int countsPerDriveInch = 10000/117;
   private final int countsStrafePerInch = 5000/51;
 
@@ -142,99 +141,15 @@ public class MecanumDriveChassisAutonomousIMU
     parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
     imu.initialize(parameters);
-  
+
     IMUTel = new IMUTelemetry();
   }
-
 
   boolean IMU_IsCalibrated () {
     return imu.isGyroCalibrated();
   }
   
-  /**
-   * Calculate the power settings and send to the wheels.  This also translates the force
-   * for the Mecanum wheels to the rotated axis based on the degree of the wheel offset.
-   * In our case 45 degrees or PI/4
-   *
-   * Assumes X is forward and Z is up then rotate XY PI/4 to align with wheel axises.
-   * placing the positive X axis on the left front wheel and the positive Y axis on the
-   * left rear wheel.
-   *
-   * Rotation is about a positive Z axis pointing UP.
-   * Positive Y is to the left.
-   *
-   * Translation angle is in radians + is CCW - is CW with ZERO to the forward of the bot.
-   * I.e. standard rotation about a positive Z axis pointing UP.
-   * E.g:
-   *    0     = forward
-   *    PI/4  = 45 deg. forward and to the left
-   *    PI/2  = to the left
-   *    3PI/4 = 135 deg. backward and to the left
-   *    PI    = backwards
-   *
-   *    -PI/4  (or) 7PI/4 = 45 deg. forward and to the right
-   *    -PI/2  (or) 6PI/4 = to the right
-   *    -3PI/4 (or) 5PI/4 = -135 deg. backward and to the left
-   *    -PI    (or) PI    = backwards
-   *
-   * vTheta rotation is also standard rotation about a positive Z axis pointing UP.
-   * thus a positive vTheta will turn the bot CCW about its Z axis.
-   *
-   **/
-  private void PowerToWheels() {
-
-    // Motors power = Y component of directional vector
-    leftFrontDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) - vTheta;
-    rightRearDriveSpeed  = vD * Math.sin(-thetaD + Math.PI / 4) + vTheta;
-
-    // Motors power = X component of directional vector
-    rightFrontDriveSpeed = vD * Math.cos(-thetaD + Math.PI / 4) + vTheta;
-    leftRearDriveSpeed   = vD * Math.cos(-thetaD + Math.PI / 4) - vTheta;
-
-    // place all the power numbers in a list for collection manipulations
-    // (easier to find min / max etc when in a list)
-    List<Double> speeds = Arrays.asList(rightFrontDriveSpeed,
-        leftFrontDriveSpeed, rightRearDriveSpeed, leftRearDriveSpeed  );
-
-    // scales the motor powers while maintaining power ratios.
-    double minPower = Collections.min(speeds);
-    double maxPower = Collections.max(speeds);
-    double maxMag = Math.max(Math.abs(minPower), Math.abs(maxPower));
-    if (maxMag > 1.0)
-    {
-      for (int i = 0; i < speeds.size(); i++)
-      {
-        speeds.set(i, speeds.get(i) / maxMag);
-      }
-    }
-    // must be same order as placed in the list
-    // send the speeds to the motors
-    rightFrontDrive.setPower(speeds.get(0));
-    leftFrontDrive.setPower(speeds.get(1));
-    rightRearDrive.setPower(speeds.get(2));
-    leftRearDrive.setPower(speeds.get(3));
-  }
-  
-  /**
-   * centers the robot to the current gyro zero
-   */
-  void centerBot()
-  {
-  
-  
-  }
-
-  /**
-   * returns IMU telemetry
-   */
-  IMUTelemetry getIMUTel () {
-  
-    angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-    composeTelemetry();
-    return IMUTel;
-  }
-  
-  /**
+  /*
    * returns ture if the bot is still moving
    */
   boolean isMoving() {
@@ -273,7 +188,10 @@ public class MecanumDriveChassisAutonomousIMU
           break;
 
         case TURN_DRIVE:
-
+          setMoveSpeed(MaxTurnSpeed);
+          turnToAbsoluteAngle(currentLeg.angle);
+          setMoveSpeed(currentLeg.speed/100);
+          driveForward(currentLeg.distance);
           break;
       }
     }
@@ -307,36 +225,53 @@ public class MecanumDriveChassisAutonomousIMU
   
   void strafeLeft(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
-    leftRearDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
-    rightFrontDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
-    rightRearDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
+    leftFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    leftRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    rightFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    rightRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
     runToPosition();
     // wait for motors to stop
     while (isMoving());
   }
-  
+
   void strafeRight(double inches){
     stopAndResetEncoders();
-    leftFrontDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
-    leftRearDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
-    rightFrontDrive.setTargetPosition(-((int)(inches * countsStrafePerInch)));
-    rightRearDrive.setTargetPosition(((int)(inches * countsStrafePerInch)));
+    leftFrontDrive.setTargetPosition((int)(inches * countsStrafePerInch));
+    leftRearDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    rightFrontDrive.setTargetPosition(-(int)(inches * countsStrafePerInch));
+    rightRearDrive.setTargetPosition((int)(inches * countsStrafePerInch));
     runToPosition();
     // wait for motors to stop
     while (isMoving());
   }
 
-  //----------------------------------------------------------------------------------------------
-  // Telemetry Configuration
-  //----------------------------------------------------------------------------------------------
+  void turnToAbsoluteAngle(double desiredAngle){
+    double delta;
+    do
+    {
+      // 1 rad = 180°/PI = 57.295779513 degrees  Multiply by 2PI to normalize to a positive angle only
+      // then convert to degrees for easy use.
+      // desired angle - current angle in degrees CCW 0-360 determines which way and how much to turn.
+      angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+      delta = desiredAngle - (( angles.firstAngle + Math.PI * 2 ) * 57.295779513) % 360;
 
-  void composeTelemetry() {
- 
+      // as long as the bot is not on the desired heading, keep turning
+      leftFrontDrive.setTargetPosition((int) (countsPerTurnDegree * -delta));
+      leftRearDrive.setTargetPosition((int) (countsPerTurnDegree * -delta));
+      rightFrontDrive.setTargetPosition((int) (countsPerTurnDegree * delta));
+      rightRearDrive.setTargetPosition((int) (countsPerTurnDegree * delta));
+      runToPosition();
+      // wait for motors to stop
+      while (isMoving()) ;
+    } while (Math.abs(delta) > angleError );  // keep going till close enough to desired angle
+  }
+
+  IMUTelemetry composeTelemetry() {
+    angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     IMUTel.imuStatus = imu.getSystemStatus().toShortString();
     IMUTel.calStatus = imu.getCalibrationStatus().toString();
     IMUTel.zTheta = String.format(Locale.getDefault(), "%.2f", angles.firstAngle);
-
+    return IMUTel;
   }
   
   void setMoveSpeed(double speed) {

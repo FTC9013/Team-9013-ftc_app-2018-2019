@@ -105,31 +105,35 @@ public class AutonomousTheMostest extends LinearOpMode {
     //
     // mode:     {FORWARD, BACKWARDS, LEFT, RIGHT, TURN_DRIVE}
     // speed:    the drive speed from 0-100%
-    // angle:    the desired angle of travel relative to the current bot position and orientation.
-    //           in DEGREES
+    // angle:    the desired angle of travel relative to the ZERO orientation in DEGREES
     // distance: the distance to travel in inches
 
+    Queue<Leg> littleBump = new LinkedList<>();
+    littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 1.0));
+
     Queue<Leg> leftPath = new LinkedList<>();
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
+    leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 13));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> centerPath = new LinkedList<>();
-    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    centerPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
+    centerPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> rightPath = new LinkedList<>();
-    rightPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
+    rightPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 17.5)); //20
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20)); // 15
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
 
     Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 4.0)); //3.5
+    lostPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+
+
 
     initVuforia();
     
@@ -148,11 +152,11 @@ public class AutonomousTheMostest extends LinearOpMode {
     VuforiaTrackable backSpace = targetsRoverRuckus.get(3);
     backSpace.setName("Back-Space");
 
-    /** For convenience, gather together all the trackable objects in one easily-iterable collection */
+    /* For convenience, gather together all the trackable objects in one easily-iterable collection */
     List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
     allTrackables.addAll(targetsRoverRuckus);
 
-    /**
+    /*
      * In order for localization to work, we need to tell the system where each target is on the field, and
      * where the phone resides on the robot.  These specifications are in the form of <em>transformation matrices.</em>
      * Transformation matrices are a central, important concept in the math here involved in localization.
@@ -172,7 +176,7 @@ public class AutonomousTheMostest extends LinearOpMode {
      *  coordinate system (the center of the field), facing up.
      */
 
-    /**
+    /*
      * To place the BlueRover target in the middle of the blue perimeter wall:
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Then, we translate it along the Y axis to the blue perimeter wall.
@@ -183,7 +187,7 @@ public class AutonomousTheMostest extends LinearOpMode {
                                                     0, 0));
     blueRover.setLocation(blueRoverLocationOnField);
 
-    /**
+    /*
      * To place the RedFootprint target in the middle of the red perimeter wall:
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Second, we rotate it 180 around the field's Z axis so the image is flat against the red perimeter wall
@@ -196,7 +200,7 @@ public class AutonomousTheMostest extends LinearOpMode {
                                                        0, 180));
     redFootprint.setLocation(redFootprintLocationOnField);
 
-    /**
+    /*
      * To place the FrontCraters target in the middle of the front perimeter wall:
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Second, we rotate it 90 around the field's Z axis so the image is flat against the front wall
@@ -209,7 +213,7 @@ public class AutonomousTheMostest extends LinearOpMode {
                                                        0, 90));
     frontCraters.setLocation(frontCratersLocationOnField);
 
-    /**
+    /*
      * To place the BackSpace target in the middle of the back perimeter wall:
      * - First we rotate it 90 around the field's X axis to flip it upright.
      * - Second, we rotate it -90 around the field's Z axis so the image is flat against the back wall
@@ -222,7 +226,7 @@ public class AutonomousTheMostest extends LinearOpMode {
                                                     0, -90));
     backSpace.setLocation(backSpaceLocationOnField);
 
-    /**
+    /*
      * Create a transformation matrix describing where the phone is on the robot.
      *
      * The coordinate frame for the robot looks the same as the field.
@@ -255,7 +259,7 @@ public class AutonomousTheMostest extends LinearOpMode {
         CAMERA_VERTICAL_DISPLACEMENT).multiplied(Orientation.getRotationMatrix(
         EXTRINSIC, YZX, DEGREES, -90, 0, 0));
 
-    /**  Let all the trackable listeners know where the camera is.  */
+    /*  Let all the trackable listeners know where the camera is.  */
     for (VuforiaTrackable trackable : allTrackables) {
       ((VuforiaTrackableDefaultListener) trackable.getListener()).setCameraLocationOnRobot(
         webcamName, cameraLocationOnRobot);
@@ -275,9 +279,7 @@ public class AutonomousTheMostest extends LinearOpMode {
 
     // start to land the bot
     landingElevator.up();
-
-    driveChassis.centerBot();
-  
+    driveChassis.move(littleBump);
     tfod.activate();
     watchdog.reset();
     
@@ -335,7 +337,6 @@ public class AutonomousTheMostest extends LinearOpMode {
       }
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)
       {
-        landingElevator.down();
         PositionOfTheGoldIs = goldPosition.MOVED;
       }
 
@@ -344,7 +345,6 @@ public class AutonomousTheMostest extends LinearOpMode {
       {
         // shuttle left to unhook even though minerals are not detected.
         driveChassis.move(lostPath);
-        landingElevator.down();
         PositionOfTheGoldIs = goldPosition.LOST;
       }
 
@@ -354,6 +354,7 @@ public class AutonomousTheMostest extends LinearOpMode {
         tfod.shutdown();
         // Start tracking the VuMarks
         targetsRoverRuckus.activate();
+        landingElevator.down();
 
         // do all the trackables stuff until the end of the opmode.
         while (opModeIsActive())
@@ -395,7 +396,7 @@ public class AutonomousTheMostest extends LinearOpMode {
       }
     }
   }
-  /**
+  /*
    * Initialize the Vuforia localization engine.
    */
   private void initVuforia() {
@@ -418,7 +419,7 @@ public class AutonomousTheMostest extends LinearOpMode {
     vuforia = ClassFactory.getInstance().createVuforia(parameters);
   }
 
-  /**
+  /*
    * Initialize the Tensor Flow Object Detection engine.
    */
   private void initTfod() {
