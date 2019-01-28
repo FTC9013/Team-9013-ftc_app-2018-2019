@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -32,17 +33,11 @@ class MecanumDriveChassisAutonomousIMU
   private static double rightFrontDriveSpeed;
   private static double rightRearDriveSpeed;
   
-  private static double translateAngle;
-  private static double translateDistance;
-  private static double driveDistance;
-  private static double rotateToAngle;
-  private static float startAngle;
-  private static boolean driveMode;  // leg drive mode
-  private static boolean moving;
+  private static double botZeroAngle;
   
   private static IMUTelemetry IMUTel;
   
-  
+/*
   // Robot speed [-1, 1].  (speed in any direction that is not rotational)
   // does not have any angular component, just scaler velocity.
   // combined with the angular component for motion.  Even if angle is 0 (forward).
@@ -58,17 +53,20 @@ class MecanumDriveChassisAutonomousIMU
 
   // Robot speed scaling factor (% of joystick input to use)
   // applied uniformly across all joystick inputs to the JoystickTokMotion() method.
-  private final double speedScale = 0.8;
+  private final double speedScale = 0.8;*/
   
   // speed for am IMU turn
   private final double MaxTurnSpeed = 0.3;
   private final int countsPerTurnDegree = 10;
-  private final double angleError = 1;          // turn angle error cutoff to stop turning.
+  private final double angleError = 2;          // turn angle error cutoff to stop turning.
   private final int countsPerDriveInch = 10000/117;
   private final int countsStrafePerInch = 5000/51;
 
   MecanumDriveChassisAutonomousIMU(HardwareMap hardwareMap)
   {
+    
+    //Telemetry localTelemetry = telemetry;
+    
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
@@ -90,11 +88,6 @@ class MecanumDriveChassisAutonomousIMU
     leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
     rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
     rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
-
-    // set motion parameters.
-    vD = 0;
-    thetaD = 0;
-    vTheta = 0;
 
     // Set all the motor speeds to 0.
     rightFrontDriveSpeed = 0;
@@ -141,7 +134,7 @@ class MecanumDriveChassisAutonomousIMU
     parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
     imu.initialize(parameters);
-
+  
     IMUTel = new IMUTelemetry();
   }
 
@@ -158,6 +151,16 @@ class MecanumDriveChassisAutonomousIMU
            || rightRearDrive.isBusy()
            || leftRearDrive.isBusy();
   }
+  
+  
+  void setZeroAngle(){
+    // 1 rad = 180°/PI = 57.295779513 degrees  Multiply by 2PI to normalize to a positive angle only
+    // then convert to degrees for easy use.
+    // desired angle - current angle in degrees CCW 0-360 determines which way and how much to turn.
+    angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+    botZeroAngle = (( angles.firstAngle + Math.PI * 2 ) * 57.295779513) % 360;
+  }
+  
   
 
   // execute a path (list of drive legs)
@@ -253,7 +256,7 @@ class MecanumDriveChassisAutonomousIMU
       // then convert to degrees for easy use.
       // desired angle - current angle in degrees CCW 0-360 determines which way and how much to turn.
       angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-      delta = desiredAngle - (( angles.firstAngle + Math.PI * 2 ) * 57.295779513) % 360;
+      delta = desiredAngle - ((( angles.firstAngle + Math.PI * 2 ) * 57.295779513) + botZeroAngle) % 360;
 
       // as long as the bot is not on the desired heading, keep turning
       leftFrontDrive.setTargetPosition((int) (countsPerTurnDegree * -delta));
@@ -266,12 +269,10 @@ class MecanumDriveChassisAutonomousIMU
     } while (Math.abs(delta) > angleError );  // keep going till close enough to desired angle
   }
 
-  IMUTelemetry composeTelemetry() {
-    angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-    IMUTel.imuStatus = imu.getSystemStatus().toShortString();
-    IMUTel.calStatus = imu.getCalibrationStatus().toString();
-    IMUTel.zTheta = String.format(Locale.getDefault(), "%.2f", angles.firstAngle);
-    return IMUTel;
+  void composeTelemetry() {
+  
+//   localTelemetry .addData("Heading (deg)", "%.2f", ((( angles.firstAngle + Math.PI * 2 ) * 57.295779513) + botZeroAngle) % 360);
+//   localTelemetry.update();
   }
   
   void setMoveSpeed(double speed) {
