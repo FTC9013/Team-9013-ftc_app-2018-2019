@@ -32,8 +32,8 @@ class MecanumDriveChassisAutonomousIMU
 
   // speed for am IMU turn
   private final double MaxTurnSpeed = 0.2;
-  private final int countsPerTurnDegree = 15;
-  private final double angleError = 1;          // turn angle error cutoff to stop turning.
+  private final int countsPerTurnDegree = 18;
+  private final double angleError = 2;          // turn angle error cutoff to stop turning.
   private final int countsPerDriveInch = 10000/117;
   private final int countsStrafePerInch = 5000/51;
 
@@ -214,6 +214,7 @@ class MecanumDriveChassisAutonomousIMU
     double delta;
     do
     {
+      stopAndResetEncoders();
       // desired angle in degrees +/- 0 to 180 where CCW is + and CW is -
       angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -228,7 +229,7 @@ class MecanumDriveChassisAutonomousIMU
       rightRearDrive.setTargetPosition((int) (countsPerTurnDegree * delta));
       runToPosition();
       // wait for motors to stop
-      while (isMoving()) ;
+      while (isMoving());
     } while (Math.abs(delta) > angleError );  // keep going till close enough to desired angle
   }
 

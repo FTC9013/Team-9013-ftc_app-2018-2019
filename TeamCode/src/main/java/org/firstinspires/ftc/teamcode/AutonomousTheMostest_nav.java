@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -58,7 +59,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 @Autonomous(name = "AutonomousTheMostest_nav", group = "Linear Opmode")
 
-//@Disabled
+@Disabled
 public class AutonomousTheMostest_nav extends LinearOpMode {
 
   // Declare OpMode members.
@@ -118,30 +119,30 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
     leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
     leftPath.add(new Leg(Leg.Mode.BACKWARDS, 40, 0, 15));
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 40, 0));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 60, 40, 0));
 
     Queue<Leg> centerPath = new LinkedList<>();
     centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     centerPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
     centerPath.add(new Leg(Leg.Mode.BACKWARDS, 40, 0, 15));
-    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 40, 0));
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 60, 40, 0));
 
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
     rightPath.add(new Leg(Leg.Mode.BACKWARDS, 40, 0, 15));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 40, 0));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 60, 40, 0));
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
-    lostPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 40, 0));
+    lostPath.add(new Leg(Leg.Mode.TURN_DRIVE, 60, 40, 0));
 
     Queue<Leg> lookLeft = new LinkedList<>();
     lookLeft.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
@@ -152,7 +153,6 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
     Queue<Leg> unhook = new LinkedList<>();
     unhook.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
-
     initVuforia();
     
     initTfod();

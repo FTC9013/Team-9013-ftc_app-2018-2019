@@ -65,6 +65,7 @@ public class AutonomousTheMostest extends LinearOpMode {
   private MecanumDriveChassisAutonomousIMU driveChassis;
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
+  private Collector collector;
   
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   private ElapsedTime watchdog = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -82,6 +83,7 @@ public class AutonomousTheMostest extends LinearOpMode {
   private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
 
   private double watchdogTime = 10.0;
+  private double collectTime = 2.5;
   
   private enum goldPosition {UNKNOWN, LEFT, CENTER, RIGHT, TARGETED, MOVED, LOST }
   private goldPosition PositionOfTheGoldIs = goldPosition.UNKNOWN;
@@ -97,7 +99,8 @@ public class AutonomousTheMostest extends LinearOpMode {
     driveChassis = new MecanumDriveChassisAutonomousIMU(hardwareMap);
     landingElevator = new Elevator(hardwareMap);
     webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
-
+    collector = new Collector(hardwareMap);
+    
     // build all the drive plans for drive by distance (to move the gold mineral)
     //
     // Each leg of the trip is added to the queue in this code block.
@@ -112,22 +115,27 @@ public class AutonomousTheMostest extends LinearOpMode {
     littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 1.0));
 
     Queue<Leg> leftPath = new LinkedList<>();
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 19));
 
     Queue<Leg> centerPath = new LinkedList<>();
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     centerPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     centerPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 16));
 
     Queue<Leg> rightPath = new LinkedList<>();
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
     rightPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 17));
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
@@ -338,6 +346,13 @@ public class AutonomousTheMostest extends LinearOpMode {
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)
       {
         PositionOfTheGoldIs = goldPosition.MOVED;
+        //pick up the gold
+        double timeStamp = runtime.time();
+        while ( runtime.time() < timeStamp + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
       }
 
       // Watchdog timer if no minerals detected for watchdog seconds
