@@ -2,5 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 public class IMUTelemetry
 {
-  String zTheta;
+  double headding;
+  double error;
 }

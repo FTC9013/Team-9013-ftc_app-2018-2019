@@ -57,7 +57,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 @Autonomous(name = "Test_TheMostest", group = "Linear Opmode")
 
-@Disabled
+//@Disabled
 public class Test_TheMostest extends LinearOpMode {
 
   // Declare OpMode members.

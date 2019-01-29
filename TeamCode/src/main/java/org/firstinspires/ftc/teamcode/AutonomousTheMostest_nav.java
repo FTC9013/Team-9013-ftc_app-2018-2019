@@ -63,7 +63,6 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
-  private IMUTelemetry IMUTel;
   private Elevator landingElevator;
   
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -108,7 +107,8 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
     // mode:     {FORWARD, BACKWARDS, LEFT, RIGHT, TURN_DRIVE}
     // speed:    the drive speed from 0-100%
     // angle:    the desired angle of travel relative to the ZERO orientation in DEGREES
-    //           ZERO is where the bot was facing when the IMU calibrated.  CCW is positive
+    //           ZERO is where the bot was facing when the IMU calibrated.
+    //           desired angle in degrees +/- 0 to 180 where CCW is + and CW is -
     // distance: the distance to travel in inches
 
     Queue<Leg> littleBump = new LinkedList<>();
@@ -151,7 +151,7 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
     lookLeft.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 5, 0));
 
     Queue<Leg> lookRight = new LinkedList<>();
-    lookRight.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 355, 0));
+    lookRight.add(new Leg(Leg.Mode.TURN_DRIVE, 40, -5, 0));
 
     initVuforia();
     
@@ -290,8 +290,7 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
       sleep(50);
       idle();
     }
-    driveChassis.setZeroAngle();
-    
+
     // Wait for the game to start (driver presses PLAY)
     waitForStart();
     runtime.reset();
