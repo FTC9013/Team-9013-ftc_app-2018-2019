@@ -115,31 +115,31 @@ public class AutonomousTheMostest extends LinearOpMode {
     littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 1.0));
 
     Queue<Leg> leftPath = new LinkedList<>();
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 19));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 13));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 19));
 
     Queue<Leg> centerPath = new LinkedList<>();
-    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    centerPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    centerPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 16));
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
+    centerPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
+    centerPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
 
     Queue<Leg> rightPath = new LinkedList<>();
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 17));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 17));
 
     Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
-    lostPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 15));
+    lostPath.add(new Leg(Leg.Mode.LEFT, 80, 0, 3.5));
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 80, 0, 15));
 
 
 
