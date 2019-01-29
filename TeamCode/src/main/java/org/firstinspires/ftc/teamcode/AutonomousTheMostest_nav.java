@@ -116,7 +116,6 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
     Queue<Leg> leftPath = new LinkedList<>();
     leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 13));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
@@ -125,7 +124,6 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
     Queue<Leg> centerPath = new LinkedList<>();
     centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    centerPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     centerPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
@@ -134,7 +132,6 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 40, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 20));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 10));
@@ -152,6 +149,9 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
 
     Queue<Leg> lookRight = new LinkedList<>();
     lookRight.add(new Leg(Leg.Mode.TURN_DRIVE, 40, -5, 0));
+
+    Queue<Leg> unhook = new LinkedList<>();
+    unhook.add(new Leg(Leg.Mode.LEFT, 40, 0, 3.5));
 
     initVuforia();
     
@@ -341,16 +341,25 @@ public class AutonomousTheMostest_nav extends LinearOpMode {
       }
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
       {
-        driveChassis.move(leftPath);
+        // if didn't look around for the gold then unhook ( looking unhooks so don't want to repeat)
+        if(looking == look.CENTER) { driveChassis.move(unhook); }
+
+          driveChassis.move(leftPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
       {
+        // if didn't look around for the gold then unhook ( looking unhooks so don't want to repeat)
+        if(looking == look.CENTER) { driveChassis.move(unhook); }
+
         driveChassis.move(centerPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
+        // if didn't look around for the gold then unhook ( looking unhooks so don't want to repeat)
+        if(looking == look.CENTER) { driveChassis.move(unhook); }
+
         driveChassis.move(rightPath);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
