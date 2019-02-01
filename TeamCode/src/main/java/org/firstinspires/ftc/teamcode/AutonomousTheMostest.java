@@ -135,7 +135,7 @@ public class AutonomousTheMostest extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 20));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 17));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 80, 0, 3.5));
