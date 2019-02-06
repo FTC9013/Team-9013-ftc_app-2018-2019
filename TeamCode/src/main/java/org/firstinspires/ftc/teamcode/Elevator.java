@@ -14,7 +14,7 @@ public class Elevator
   static final double elevatorStop = 0;
 
   //Maximum height of Elevator.
-  static final int topFloor = 1125;
+  static final int topFloor = 1150;
   //Minimum height of Elevator.
   static final int lobbyFloor = 0;
 

@@ -139,9 +139,9 @@ public class AutonomousTheMostest extends LinearOpMode {
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 80, 0, 3.5));
-    lostPath.add(new Leg(Leg.Mode.FORWARD, 80, 0, 15));
-
-
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 80, 0, 20));
+    lostPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 3.5));
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
 
     initVuforia();
     
