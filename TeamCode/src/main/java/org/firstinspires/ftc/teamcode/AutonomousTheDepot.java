@@ -56,10 +56,10 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@Autonomous(name = "AutonomousTheMostest", group = "Linear Opmode")
+@Autonomous(name = "AutonomousTheDepot", group = "Linear Opmode")
 
 //@Disabled
-public class AutonomousTheMostest extends LinearOpMode {
+public class AutonomousTheDepot extends LinearOpMode {
 
   // Declare OpMode members.
   private MecanumDriveChassisAutonomousIMU driveChassis;
@@ -115,33 +115,41 @@ public class AutonomousTheMostest extends LinearOpMode {
     littleBump.add(new Leg(Leg.Mode.FORWARD, 20, 0, 1.0));
 
     Queue<Leg> leftPath = new LinkedList<>();
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
-    leftPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 19));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
+    leftPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
+    leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 17));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
+    leftPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 50));
+    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
+
 
     Queue<Leg> centerPath = new LinkedList<>();
-    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    centerPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
-    centerPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
+    centerPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
+    centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
+    centerPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 65));
+    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
 
     Queue<Leg> rightPath = new LinkedList<>();
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.LEFT, 20, 0, 3.5));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 20, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 16));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
+    rightPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 80));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
 
     Queue<Leg> lostPath = new LinkedList<>();
-    lostPath.add(new Leg(Leg.Mode.LEFT, 80, 0, 3.5));
-    lostPath.add(new Leg(Leg.Mode.FORWARD, 80, 0, 20));
-    lostPath.add(new Leg(Leg.Mode.RIGHT, 20, 0, 3.5));
-    lostPath.add(new Leg(Leg.Mode.FORWARD, 20, 0, 16));
+    lostPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
+    lostPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
 
     initVuforia();
     
@@ -350,7 +358,7 @@ public class AutonomousTheMostest extends LinearOpMode {
         double timeStamp = runtime.time();
         while ( runtime.time() < timeStamp + collectTime )
         {
-          collector.collect();
+          collector.drop();
         }
         collector.cancel();
       }

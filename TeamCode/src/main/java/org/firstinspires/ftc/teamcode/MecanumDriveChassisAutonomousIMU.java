@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.Queue;
 
+import static java.lang.Math.abs;
+
 class MecanumDriveChassisAutonomousIMU
 {
   private DcMotor leftFrontDrive;
@@ -36,7 +38,8 @@ class MecanumDriveChassisAutonomousIMU
   private final double angleError = 2;          // turn angle error cutoff to stop turning.
   private final int countsPerDriveInch = 10000/117;
   private final int countsStrafePerInch = 5000/51;
-
+  // +/- counts to say the motor is stopped a the target position.
+  static final int closeEnough = 5;
   MecanumDriveChassisAutonomousIMU(HardwareMap hardwareMap)
   {
 
@@ -119,10 +122,14 @@ class MecanumDriveChassisAutonomousIMU
    * returns ture if the bot is still moving
    */
   boolean isMoving() {
-//    return moving;
+    return abs( rightFrontDrive.getCurrentPosition()
+        - rightFrontDrive.getTargetPosition()) > closeEnough;
+
+/*
     return rightFrontDrive.isBusy() || leftFrontDrive.isBusy()
            || rightRearDrive.isBusy()
            || leftRearDrive.isBusy();
+*/
   }
   
   // execute a path (list of drive legs)
