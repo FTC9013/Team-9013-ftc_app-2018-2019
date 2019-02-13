@@ -120,10 +120,14 @@ public class AutonomousTheDepot extends LinearOpMode {
     leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 17));
     leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 50));
-    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15));
+//    leftPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
+//    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 50));
+//    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
+    
+    Queue<Leg> leftDepot = new LinkedList<>();
+    leftDepot.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
+    leftDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -30, 23));
 
 
     Queue<Leg> centerPath = new LinkedList<>();
@@ -146,6 +150,7 @@ public class AutonomousTheDepot extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 80));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
+//    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -30, 25));
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
@@ -339,6 +344,13 @@ public class AutonomousTheDepot extends LinearOpMode {
       else if(PositionOfTheGoldIs == goldPosition.LEFT)
       {
         driveChassis.move(leftPath);
+        double timeStampA = runtime.time();
+        while ( runtime.time() < timeStampA + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
+        driveChassis.move(leftDepot);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
@@ -358,7 +370,7 @@ public class AutonomousTheDepot extends LinearOpMode {
         double timeStamp = runtime.time();
         while ( runtime.time() < timeStamp + collectTime )
         {
-          collector.drop();
+//          collector.drop();
         }
         collector.cancel();
       }
