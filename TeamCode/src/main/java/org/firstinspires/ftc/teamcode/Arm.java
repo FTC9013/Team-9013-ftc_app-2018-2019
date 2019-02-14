@@ -1,14 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
 public class Arm
 {
   private DcMotorEx  armMotor = null;
+//  private ModernRoboticsTouchSensor armSensor = null;
   
   static final double armRun = 1.0;
   static final double armStop = 0;
@@ -22,6 +27,8 @@ public class Arm
   static final int up = 1000;
   //Minimum height of arm
   static final int down = 10;
+  //Height arm will go up in auto
+  static final int autoHight = 450;
 
   
   Arm(HardwareMap hardwareMap)
@@ -29,6 +36,8 @@ public class Arm
     // Initialize the hardware variables. Note that the strings used here as parameters
     // to 'get' must correspond to the names assigned during the robot configuration
     // step (using the FTC Robot Controller app on the phone).
+//    armSensor = (ModernRoboticsTouchSensor)hardwareMap.get(TouchSensor.class, "armSensor"); // Hub 2 MR Touch Sensor port 0
+    
     armMotor = (DcMotorEx)hardwareMap.get(DcMotor.class, "aMotor");  //hub 2 port 1
     
     armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -64,6 +73,7 @@ public class Arm
     armMotor.setTargetPosition(down);
   }
   
+  void crater() {armMotor.setTargetPosition(autoHight);}
   
   int getPosition()
   {

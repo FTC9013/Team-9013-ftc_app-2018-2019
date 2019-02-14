@@ -121,14 +121,10 @@ public class AutonomousTheDepot extends LinearOpMode {
     leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 17));
     leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
     leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15));
-//    leftPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
-//    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 50));
-//    leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
     
     Queue<Leg> leftDepot = new LinkedList<>();
     leftDepot.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
     leftDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -30, 23));
-
 
     Queue<Leg> centerPath = new LinkedList<>();
     centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
@@ -136,10 +132,11 @@ public class AutonomousTheDepot extends LinearOpMode {
     centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
-    centerPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
-    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 65));
-    centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
-
+  
+    Queue<Leg> centerDepot = new LinkedList<>();
+    centerDepot.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
+    centerDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 23));
+    
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
@@ -147,11 +144,11 @@ public class AutonomousTheDepot extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 16));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
-    rightPath.add(new Leg(Leg.Mode.BACKWARDS, 30, 0, 13));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 90, 80));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -45, 50));
-//    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, -30, 25));
-
+  
+    Queue<Leg> rightDepot = new LinkedList<>();
+    rightDepot.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
+    rightDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 30, 23));
+    
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
     lostPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
@@ -356,11 +353,25 @@ public class AutonomousTheDepot extends LinearOpMode {
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
       {
         driveChassis.move(centerPath);
+        double timeStampA = runtime.time();
+        while ( runtime.time() < timeStampA + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
+        driveChassis.move(centerDepot);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
         driveChassis.move(rightPath);
+        double timeStampA = runtime.time();
+        while ( runtime.time() < timeStampA + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
+        driveChassis.move(rightDepot);
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)

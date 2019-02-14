@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -66,6 +67,7 @@ public class AutonomousTheCrater extends LinearOpMode {
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
   private Collector collector;
+  private Arm arm;
   
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   private ElapsedTime watchdog = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -100,6 +102,7 @@ public class AutonomousTheCrater extends LinearOpMode {
     landingElevator = new Elevator(hardwareMap);
     webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
     collector = new Collector(hardwareMap);
+    arm = new Arm(hardwareMap);
     
     // build all the drive plans for drive by distance (to move the gold mineral)
     //
@@ -135,7 +138,10 @@ public class AutonomousTheCrater extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 20));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 16));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13)); // distance was 16
+    
+    Queue<Leg> driveCrater = new LinkedList<>();
+    driveCrater.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
@@ -341,6 +347,13 @@ public class AutonomousTheCrater extends LinearOpMode {
       else if(PositionOfTheGoldIs == goldPosition.RIGHT)
       {
         driveChassis.move(rightPath);
+        double timeStampA = runtime.time();
+        while ( runtime.time() < timeStampA + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
+        arm.crater();
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.TARGETED)
