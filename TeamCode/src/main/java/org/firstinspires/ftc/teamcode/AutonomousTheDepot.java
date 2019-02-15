@@ -66,6 +66,7 @@ public class AutonomousTheDepot extends LinearOpMode {
   private IMUTelemetry IMUTel;
   private Elevator landingElevator;
   private Collector collector;
+  private Arm arm;
   
   private ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   private ElapsedTime watchdog = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -100,6 +101,7 @@ public class AutonomousTheDepot extends LinearOpMode {
     landingElevator = new Elevator(hardwareMap);
     webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
     collector = new Collector(hardwareMap);
+    arm = new Arm(hardwareMap);
     
     // build all the drive plans for drive by distance (to move the gold mineral)
     //
@@ -348,6 +350,7 @@ public class AutonomousTheDepot extends LinearOpMode {
         }
         collector.cancel();
         driveChassis.move(leftDepot);
+        arm.crater();
         PositionOfTheGoldIs = goldPosition.TARGETED;
       }
       else if(PositionOfTheGoldIs == goldPosition.CENTER)
