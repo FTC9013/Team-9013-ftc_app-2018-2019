@@ -123,14 +123,14 @@ public class AutonomousTheCrater extends LinearOpMode {
     leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     leftPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 12));
     leftPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15)); //Was 19
+    leftPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 17)); //Was 19
 
     Queue<Leg> centerPath = new LinkedList<>();
     centerPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
     centerPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     centerPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
-    centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 12)); //Was 16
+    centerPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15)); //Was 16
 
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
@@ -138,10 +138,9 @@ public class AutonomousTheCrater extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
     rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 20));
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 12)); // distance was 16
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15)); // distance was 16
     
-    Queue<Leg> driveCrater = new LinkedList<>();
-    driveCrater.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
+ 
 
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
@@ -359,8 +358,7 @@ public class AutonomousTheCrater extends LinearOpMode {
           collector.collect();
         }
         collector.cancel();
-        arm.crater();
-        driveChassis.move(driveCrater);
+
       }
 
       // Watchdog timer if no minerals detected for watchdog seconds

@@ -141,15 +141,17 @@ public class AutonomousTheDepot extends LinearOpMode {
     
     Queue<Leg> rightPath = new LinkedList<>();
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
-    rightPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 16));
-    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
-    rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 13));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 3.5));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 40, 0, 20));
+    rightPath.add(new Leg(Leg.Mode.RIGHT, 40, 0, 11));
+    rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 50, 0, 0));
+    rightPath.add(new Leg(Leg.Mode.FORWARD, 50, 0, 13));
+    
   
     Queue<Leg> rightDepot = new LinkedList<>();
     rightDepot.add(new Leg(Leg.Mode.FORWARD, 30, 0, 3));
-    rightDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 30, 23));
+    rightDepot.add(new Leg(Leg.Mode.TURN_DRIVE, 50, 30, 23));
+    rightDepot.add(new Leg(Leg.Mode.BACKWARDS, 50, 0, 3));
     
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.RIGHT, 30, 0, 3.5));
