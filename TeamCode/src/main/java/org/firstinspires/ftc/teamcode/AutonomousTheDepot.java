@@ -400,7 +400,14 @@ public class AutonomousTheDepot extends LinearOpMode {
       if(watchdog.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
       {
         // shuttle left to unhook even though minerals are not detected.
-        driveChassis.move(lostPath);
+        driveChassis.move(centerPath);
+        double timeStampA = runtime.time();
+        while ( runtime.time() < timeStampA + collectTime )
+        {
+          collector.collect();
+        }
+        collector.cancel();
+        driveChassis.move(centerDepot);
         PositionOfTheGoldIs = goldPosition.LOST;
       }
 

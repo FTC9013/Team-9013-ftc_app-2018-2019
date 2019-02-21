@@ -140,8 +140,6 @@ public class AutonomousTheCrater extends LinearOpMode {
     rightPath.add(new Leg(Leg.Mode.TURN_DRIVE, 30, 0, 0));
     rightPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 15)); // distance was 16
     
- 
-
     Queue<Leg> lostPath = new LinkedList<>();
     lostPath.add(new Leg(Leg.Mode.LEFT, 30, 0, 3.5));
     lostPath.add(new Leg(Leg.Mode.FORWARD, 30, 0, 20));
@@ -365,7 +363,7 @@ public class AutonomousTheCrater extends LinearOpMode {
       if(watchdog.time() > watchdogTime && PositionOfTheGoldIs == goldPosition.UNKNOWN)
       {
         // shuttle left to unhook even though minerals are not detected.
-        driveChassis.move(lostPath);
+        driveChassis.move(centerPath);
         PositionOfTheGoldIs = goldPosition.LOST;
       }
 
